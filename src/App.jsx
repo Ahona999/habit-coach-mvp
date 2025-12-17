@@ -1,18 +1,23 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './index.css'
-
+import Header from "./components/Header"
+import Sidebar from "./components/Sidebar"
+import Dashboard from "./pages/Dashboard"
+import "./index.css"
 
 export default function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <h1 className="text-4xl font-bold text-green-400">
-        Yeahhhh Tailwind is working 🚀
-      </h1>
+    <div className="min-h-screen bg-black text-white">
+      <Header />
+
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1">
+          <Dashboard />
+        </main>
+      </div>
     </div>
   )
 }
+
 
 
 
