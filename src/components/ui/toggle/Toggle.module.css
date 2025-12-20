@@ -1,0 +1,122 @@
+/**
+ * Toggle Component Styles
+ * 
+ * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
+ * All values come from the design system - no hardcoded colors, spacing, or dimensions.
+ * 
+ * Maps to Figma Toggle component styles:
+ * - Colors: button-primary and semantic-neutral tokens
+ * - Spacing: Design system spacing tokens for padding
+ * - States: On (checked), Off (unchecked), Disabled
+ */
+
+.toggleWrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--toggle-label-gap, 12px);
+}
+
+.toggleTrack {
+  /* Base track styles - all values from design tokens via CSS variables */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  
+  /* Dimensions from Figma */
+  width: var(--toggle-width);
+  height: var(--toggle-height);
+  padding: var(--toggle-padding-y) var(--toggle-padding-x);
+  border-radius: var(--toggle-border-radius);
+  
+  /* Colors from design tokens - OFF state by default */
+  /* Maps to Figma OFF state: semantic-neutral background with border-focus border */
+  background-color: var(--toggle-track-bg-off);
+  border: 2px solid var(--toggle-track-border-off);
+  
+  /* Layout */
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  
+  /* Accessibility */
+  outline: none;
+  user-select: none;
+}
+
+/* ON state - Maps to Figma ON state */
+/* Uses button-primary/background-hover (#4338CA) */
+.toggleTrack--checked {
+  background-color: var(--toggle-track-bg-on);
+  border-color: var(--toggle-track-bg-on);
+}
+
+/* Disabled state */
+.toggleTrack--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Thumb (slider circle) */
+.toggleThumb {
+  position: absolute;
+  left: var(--toggle-padding-x);
+  
+  /* Dimensions from Figma */
+  width: var(--toggle-thumb-size);
+  height: var(--toggle-thumb-size);
+  border-radius: 50%; /* Perfect circle */
+  
+  /* Colors from design tokens - OFF state by default */
+  /* Maps to Figma OFF state: semantic-neutral-100 thumb */
+  background-color: var(--toggle-thumb-bg-off);
+  
+  /* Layout */
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  pointer-events: none;
+}
+
+/* ON state thumb - Maps to Figma ON state */
+/* Uses background.primary (white) */
+.toggleThumb--checked {
+  background-color: var(--toggle-thumb-bg-on);
+  /* Move thumb to the right side */
+  /* Calculation: track width - thumb size - left padding - right padding */
+  transform: translateX(calc(var(--toggle-width) - var(--toggle-thumb-size) - var(--toggle-padding-x) - var(--toggle-padding-x)));
+}
+
+/* Disabled state thumb */
+.toggleThumb--disabled {
+  opacity: 0.6;
+}
+
+/* Hidden native checkbox input */
+.toggleInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+/* Label styling */
+.toggleLabel {
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggleWrapper--disabled .toggleLabel {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Focus styles for accessibility */
+.toggleTrack:focus-visible {
+  outline: 2px solid var(--toggle-track-border-off);
+  outline-offset: 2px;
+}
+
+.toggleTrack--checked:focus-visible {
+  outline-color: var(--toggle-track-bg-on);
+}
+

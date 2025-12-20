@@ -1,0 +1,120 @@
+/**
+ * Dropdown Component Styles
+ * 
+ * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
+ * All values come from the design system - no hardcoded colors, spacing, or typography.
+ * 
+ * Maps to Figma Dropdown component styles:
+ * - Colors: input.* tokens
+ * - Typography: Satoshi font family, medium weight (500), h5 font-size/line-height
+ * - Spacing: Design system spacing tokens for padding, border-radius, and height
+ * - States: Default, Hover, Focus, Disabled (matching Figma states)
+ */
+
+.dropdownWrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.dropdown {
+  /* Base styles - all values from design tokens via CSS variables */
+  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 20px (h5), Line height = 28px */
+  font-family: var(--dropdown-font-family, 'Satoshi');
+  font-weight: var(--dropdown-font-weight, 500);
+  font-size: var(--dropdown-font-size);
+  line-height: var(--dropdown-line-height);
+  letter-spacing: var(--dropdown-letter-spacing);
+  
+  /* Spacing from design tokens */
+  /* Maps to Figma: 32px horizontal, 16px vertical padding, 12px border-radius, 64px height */
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-icon-size) + 8px); /* Space for arrow icon */
+  border-radius: var(--dropdown-border-radius);
+  height: var(--dropdown-height);
+  min-height: var(--dropdown-height);
+  
+  /* Colors from design tokens */
+  /* Maps to Figma: input/background, input/border, text/secondary */
+  background-color: var(--dropdown-bg);
+  color: var(--dropdown-text);
+  border: 1px solid var(--dropdown-border);
+  
+  /* Layout */
+  width: 100%;
+  outline: none;
+  appearance: none; /* Remove native select styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  
+  /* Interactions */
+  cursor: pointer;
+  transition: border-color 0.2s ease, border-width 0.2s ease, padding 0.2s ease;
+}
+
+/* Placeholder option styling */
+.dropdown option:disabled {
+  color: var(--dropdown-placeholder);
+}
+
+/* Hover state - Maps to Figma Hover state */
+/* Uses input/border-hover with 2px border */
+.dropdown:not(.dropdown--disabled):hover {
+  border-color: var(--dropdown-border-hover);
+  border-width: 2px;
+  /* Adjust padding to maintain visual size when border increases from 1px to 2px */
+  padding: calc(var(--dropdown-padding-y) - 0.5px) calc(var(--dropdown-padding-x) - 0.5px);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-icon-size) + 8px - 0.5px);
+}
+
+/* Focus state - Maps to Figma Active/Focus state */
+/* Uses input/border-focus with 2px border */
+.dropdown:not(.dropdown--disabled):focus {
+  border-color: var(--dropdown-border-focus);
+  border-width: 2px;
+  /* Adjust padding to maintain visual size when border increases from 1px to 2px */
+  padding: calc(var(--dropdown-padding-y) - 0.5px) calc(var(--dropdown-padding-x) - 0.5px);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-icon-size) + 8px - 0.5px);
+}
+
+/* Disabled state - Maps to Figma Disabled state */
+/* Uses input/background-disabled, input/border, input/placeholder text */
+.dropdown--disabled {
+  cursor: not-allowed;
+  opacity: 1; /* Colors already handle disabled appearance */
+  background-color: var(--dropdown-bg);
+  color: var(--dropdown-placeholder);
+}
+
+.dropdown--disabled:hover {
+  border-color: var(--dropdown-border); /* Prevent hover on disabled */
+  border-width: 1px;
+  padding: var(--dropdown-padding-y) var(--dropdown-padding-x);
+  padding-right: calc(var(--dropdown-padding-x) + var(--dropdown-icon-size) + 8px);
+}
+
+/* Custom arrow icon */
+.arrow {
+  position: absolute;
+  right: var(--dropdown-padding-x);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--dropdown-icon-size);
+  height: var(--dropdown-icon-size);
+}
+
+.arrowIcon {
+  color: var(--dropdown-text);
+  width: 100%;
+  height: 100%;
+}
+
+/* Disabled arrow styling */
+.dropdownWrapper--disabled .arrowIcon {
+  color: var(--dropdown-placeholder);
+}
+

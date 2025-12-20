@@ -1,0 +1,171 @@
+/**
+ * Modal Component Styles
+ * 
+ * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
+ * All values come from the design system - no hardcoded colors, spacing, or typography.
+ * 
+ * Maps to Figma Modal component styles:
+ * - Colors: surface, background, and border tokens
+ * - Typography: Satoshi font family with various weights and sizes
+ * - Spacing: Design system spacing tokens for padding, gaps, and dimensions
+ * - Features: Backdrop overlay, centered modal, smooth animations
+ */
+
+/* Backdrop overlay */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--modal-backdrop);
+  z-index: 1000;
+  
+  /* Animation */
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Modal container */
+.modal {
+  /* Base modal styles - all values from design tokens via CSS variables */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--modal-width);
+  max-width: 90vw;
+  max-height: 90vh;
+  
+  /* Colors from design tokens */
+  background-color: var(--modal-bg);
+  
+  /* Spacing from design tokens */
+  padding: var(--modal-padding-y) var(--modal-padding-x);
+  border-radius: var(--modal-border-radius);
+  
+  /* Shadow */
+  box-shadow: var(--modal-shadow);
+  
+  /* Layout */
+  overflow: hidden;
+  
+  /* Animation */
+  animation: scaleIn 0.2s ease-out;
+  transform-origin: center;
+}
+
+/* Header section */
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--modal-gap);
+  flex-shrink: 0;
+}
+
+/* Title */
+.modalTitle {
+  /* Typography from design tokens - H3 */
+  /* Maps to Figma: Font family = Satoshi, Weight = Bold (700), Size = 28px, Line height = 36px */
+  font-family: var(--modal-font-family, 'Satoshi');
+  font-weight: var(--modal-title-font-weight);
+  font-size: var(--modal-title-font-size);
+  line-height: var(--modal-title-line-height);
+  letter-spacing: var(--modal-title-letter-spacing);
+  color: var(--modal-text);
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+/* Close button */
+.modalClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--modal-text);
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.modalClose:hover {
+  opacity: 0.7;
+}
+
+.modalClose:focus-visible {
+  outline: 2px solid var(--modal-border);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.closeIcon {
+  width: 100%;
+  height: 100%;
+}
+
+/* Body section */
+.modalBody {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-bottom: var(--modal-gap);
+  min-height: 0;
+}
+
+/* Footer section */
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--modal-gap);
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal {
+    width: 95vw;
+    max-width: 95vw;
+    padding: var(--modal-padding-y) var(--modal-padding-x);
+  }
+  
+  .modalFooter {
+    flex-direction: column;
+  }
+  
+  .modalFooter button {
+    width: 100% !important;
+  }
+}
+

@@ -1,0 +1,241 @@
+/**
+ * Navbar Component Styles
+ * 
+ * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
+ * All values come from the design system - no hardcoded colors, spacing, or typography.
+ * 
+ * Maps to Figma Navbar component styles:
+ * - Colors: background, border, and status-info tokens
+ * - Typography: Satoshi font family with various weights and sizes
+ * - Spacing: Design system spacing tokens for padding, gaps, and dimensions
+ * - States: Expanded (241px width) and Collapsed (77px width)
+ */
+
+.navbar {
+  /* Base navbar styles - all values from design tokens via CSS variables */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: var(--navbar-width);
+  
+  /* Colors from design tokens */
+  background-color: var(--navbar-bg);
+  
+  /* Layout */
+  overflow: hidden;
+  transition: width 0.2s ease;
+}
+
+/* Header section */
+.navbarHeader {
+  /* Maps to Figma header: 69px height, border-bottom */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--navbar-header-height);
+  padding: var(--navbar-padding);
+  border-bottom: 1.5px solid var(--navbar-border);
+  flex-shrink: 0;
+}
+
+/* Title/Logo */
+.navbarTitle {
+  /* Typography from design tokens - H3 */
+  /* Maps to Figma: Font family = Satoshi, Weight = Bold (700), Size = 28px, Line height = 36px */
+  font-family: var(--navbar-font-family, 'Satoshi');
+  font-weight: var(--navbar-title-font-weight);
+  font-size: var(--navbar-title-font-size);
+  line-height: var(--navbar-title-line-height);
+  letter-spacing: var(--navbar-title-letter-spacing);
+  color: var(--navbar-text-primary);
+  margin: 0;
+  padding: 0;
+}
+
+/* Toggle button */
+.navbarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--navbar-icon-size);
+  height: var(--navbar-icon-size);
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--navbar-text-primary);
+  transition: transform 0.2s ease;
+}
+
+.toggleIcon {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.2s ease;
+}
+
+.navbarToggle:hover {
+  opacity: 0.7;
+}
+
+.navbarToggle:focus-visible {
+  outline: 2px solid var(--navbar-border);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Collapsed state - center toggle button */
+.navbar--collapsed .navbarHeader {
+  justify-content: center;
+}
+
+/* Navigation items container */
+.navbarItems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--navbar-gap);
+  padding: var(--navbar-padding);
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Navigation item */
+.navbarItem {
+  /* Maps to Figma nav item: 12px padding, 12px border-radius, 16px gap between icon and label */
+  display: flex;
+  align-items: center;
+  gap: var(--navbar-gap);
+  padding: var(--navbar-padding);
+  border-radius: var(--navbar-border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--navbar-text-primary);
+}
+
+.navbarItem:hover {
+  background-color: var(--navbar-active-bg);
+  opacity: 0.7;
+}
+
+/* Active navigation item */
+/* Maps to Figma active state: status-info/background (#EFF6FF) */
+.navbarItem--active {
+  background-color: var(--navbar-active-bg);
+}
+
+/* Navigation item icon */
+.navbarItemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--navbar-icon-size);
+  height: var(--navbar-icon-size);
+  flex-shrink: 0;
+  color: var(--navbar-text-primary);
+}
+
+/* Navigation item label */
+.navbarItemLabel {
+  /* Typography from design tokens - H6 */
+  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
+  font-family: var(--navbar-font-family, 'Satoshi');
+  font-weight: var(--navbar-item-font-weight);
+  font-size: var(--navbar-item-font-size);
+  line-height: var(--navbar-item-line-height);
+  color: var(--navbar-text-primary);
+  white-space: nowrap;
+}
+
+/* Active item label - can be styled differently if needed */
+.navbarItem--active .navbarItemLabel {
+  color: var(--navbar-text-primary);
+}
+
+/* Collapsed state - center items */
+.navbar--collapsed .navbarItem {
+  justify-content: center;
+  padding: var(--navbar-padding);
+}
+
+/* Footer section */
+.navbarFooter {
+  /* Maps to Figma footer: 69px height, border-top */
+  display: flex;
+  align-items: center;
+  height: var(--navbar-footer-height);
+  padding: var(--navbar-padding);
+  border-top: 1.5px solid var(--navbar-border);
+  flex-shrink: 0;
+}
+
+/* User profile container */
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: var(--navbar-gap);
+  width: 100%;
+}
+
+/* User avatar */
+.userAvatar {
+  width: var(--navbar-avatar-size);
+  height: var(--navbar-avatar-size);
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: var(--navbar-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* User info */
+/* Maps to Figma: 4px gap between name and plan */
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--navbar-gap-small, 4px);
+  flex: 1;
+  min-width: 0;
+}
+
+/* User name */
+.userName {
+  /* Typography from design tokens - Body Bold */
+  /* Maps to Figma: Font family = Satoshi, Weight = Bold (700), Size = 16px, Line height = 24px */
+  font-family: var(--navbar-font-family, 'Satoshi');
+  font-weight: var(--navbar-user-name-font-weight);
+  font-size: var(--navbar-user-name-font-size);
+  line-height: var(--navbar-user-name-line-height);
+  color: var(--navbar-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* User plan */
+.userPlan {
+  /* Typography from design tokens - Body Small Regular */
+  /* Maps to Figma: Font family = Satoshi, Weight = Regular (400), Size = 14px, Line height = 20px */
+  font-family: var(--navbar-font-family, 'Satoshi');
+  font-weight: var(--navbar-user-plan-font-weight);
+  font-size: var(--navbar-user-plan-font-size);
+  line-height: var(--navbar-user-plan-line-height);
+  color: var(--navbar-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Collapsed state - center avatar */
+.navbar--collapsed .userProfile {
+  justify-content: center;
+}
+

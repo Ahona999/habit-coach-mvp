@@ -1,0 +1,90 @@
+/**
+ * NavItem Component Styles
+ * 
+ * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
+ * All values come from the design system - no hardcoded colors, spacing, or typography.
+ * 
+ * Maps to Figma NavItem component styles:
+ * - Colors: status-info and text tokens
+ * - Typography: Satoshi font family, medium weight (500), h6 font-size/line-height
+ * - Spacing: Design system spacing tokens for padding, border-radius, and gaps
+ * - States: Active (light blue background) and Inactive (neutral)
+ */
+
+.navItem {
+  /* Base nav item styles - all values from design tokens via CSS variables */
+  display: flex;
+  align-items: center;
+  gap: var(--navitem-gap);
+  padding: var(--navitem-padding);
+  border-radius: var(--navitem-border-radius);
+  
+  /* Colors from design tokens - Inactive state by default */
+  /* Maps to Figma Inactive state: transparent background */
+  background-color: var(--navitem-bg);
+  color: var(--navitem-text);
+  
+  /* Layout */
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  outline: none;
+  user-select: none;
+  width: 100%;
+}
+
+/* Active state - Maps to Figma Active state */
+/* Uses status-info/background (#EFF6FF) */
+.navItem--active {
+  background-color: var(--navitem-bg);
+  color: var(--navitem-text);
+}
+
+/* Hover state - Subtle highlight */
+/* Uses status-info/background for hover effect */
+.navItem:hover {
+  background-color: var(--navitem-hover-bg);
+}
+
+/* Active items don't need hover effect change */
+.navItem--active:hover {
+  background-color: var(--navitem-bg);
+}
+
+/* Icon container */
+.navItemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--navitem-icon-size);
+  height: var(--navitem-icon-size);
+  flex-shrink: 0;
+  color: var(--navitem-text);
+  transition: color 0.2s ease;
+}
+
+/* Apply color to SVG icons that use currentColor */
+.navItemIcon svg {
+  color: var(--navitem-text);
+  fill: currentColor;
+}
+
+/* Label styling */
+.navItemLabel {
+  /* Typography from design tokens - H6 */
+  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
+  font-family: var(--navitem-font-family, 'Satoshi');
+  font-weight: var(--navitem-font-weight);
+  font-size: var(--navitem-font-size);
+  line-height: var(--navitem-line-height);
+  letter-spacing: var(--navitem-letter-spacing);
+  color: var(--navitem-text);
+  white-space: pre-wrap;
+  transition: color 0.2s ease;
+}
+
+/* Focus styles for accessibility */
+.navItem:focus-visible {
+  outline: 2px solid var(--navitem-text);
+  outline-offset: 2px;
+}
+

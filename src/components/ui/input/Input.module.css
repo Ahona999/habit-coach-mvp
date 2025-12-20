@@ -1,0 +1,167 @@
+/**
+ * Input Component Styles
+ * 
+ * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
+ * All values come from the design system - no hardcoded colors, spacing, or typography.
+ * 
+ * Maps to Figma Input component styles:
+ * - Colors: input.* and status-error/status-success tokens
+ * - Typography: Satoshi font family, medium weight (500), h5 font-size/line-height
+ * - Spacing: Design system spacing tokens for padding and border-radius
+ * - States: Default, Hover, Focus, Disabled, Error, Success (matching Figma states)
+ */
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--input-gap, 8px);
+  width: 100%;
+}
+
+.label {
+  /* Typography from design tokens */
+  font-family: var(--input-font-family, 'Satoshi');
+  font-weight: var(--input-font-weight, 500);
+  font-size: var(--input-font-size);
+  line-height: var(--input-line-height);
+  color: var(--label-color, var(--input-text));
+  display: block;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input {
+  /* Base styles - all values from design tokens via CSS variables */
+  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 20px (h5), Line height = 28px */
+  font-family: var(--input-font-family, 'Satoshi');
+  font-weight: var(--input-font-weight, 500);
+  font-size: var(--input-font-size);
+  line-height: var(--input-line-height);
+  letter-spacing: var(--input-letter-spacing);
+  
+  /* Spacing from design tokens */
+  /* Maps to Figma Large: 32px horizontal, 16px vertical padding, 12px border-radius */
+  padding: var(--input-padding-y) var(--input-padding-x);
+  padding-right: var(--input-padding-x-right, var(--input-padding-x)); /* Adjust for icons */
+  border-radius: var(--input-border-radius);
+  
+  /* Colors from design tokens - state dependent */
+  /* Maps to Figma: input/background, input/border, input/text */
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: var(--input-border-width) solid var(--input-border);
+  
+  /* Layout */
+  width: 100%;
+  outline: none;
+  
+  /* Interactions */
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Placeholder styling - Maps to Figma placeholder color */
+.input::placeholder {
+  color: var(--input-placeholder);
+  opacity: 1;
+}
+
+/* Hover state - Maps to Figma Hover state */
+/* Uses input/border-hover */
+.input:not(.input--disabled):hover {
+  border-color: var(--input-border-hover);
+}
+
+/* Focus state - Maps to Figma Active/Focus state */
+/* Uses input/border-focus with 3px border width */
+/* Note: Figma shows 3px border on focus, so we adjust padding to maintain visual size */
+.input:not(.input--disabled):focus {
+  border-color: var(--input-border-focus);
+  border-width: 3px;
+  /* Adjust padding to maintain same visual size when border increases from 1px to 3px */
+  /* Subtract 2px total (1px on each side) to account for border increase */
+  padding: calc(var(--input-padding-y) - 1px) calc(var(--input-padding-x) - 1px);
+  /* For inputs with icons, maintain the icon spacing */
+  padding-right: calc(var(--input-padding-x-right, var(--input-padding-x)) - 1px);
+}
+
+/* Adjust focus padding for inputs with icons */
+.inputWrapper--error .input:not(.input--disabled):focus,
+.inputWrapper--success .input:not(.input--disabled):focus {
+  padding-right: calc(var(--input-padding-x) + 32px + 8px - 1px);
+}
+
+/* Error state - Maps to Figma Error state */
+/* Uses status-error/background, input/border-error, input/border-error text */
+.input--error {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+.inputWrapper--error .input {
+  padding-right: calc(var(--input-padding-x) + 32px + 8px); /* Space for icon + gap */
+}
+
+/* Success state - Maps to Figma Success state */
+/* Uses status-success/background, status-success/icon border, status-success/text */
+.input--success {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+.inputWrapper--success .input {
+  padding-right: calc(var(--input-padding-x) + 32px + 8px); /* Space for icon + gap */
+}
+
+/* Disabled state - Maps to Figma Disabled state */
+/* Uses input/background-disabled, input/border, faded text */
+.input--disabled {
+  cursor: not-allowed;
+  opacity: 1; /* Colors already handle disabled appearance */
+  background-color: var(--input-bg);
+}
+
+.input--disabled:hover {
+  border-color: var(--input-border); /* Prevent hover on disabled */
+}
+
+/* Icon styling */
+/* Positioned to the right with spacing matching Figma (10px gap from text) */
+.icon {
+  position: absolute;
+  right: var(--input-padding-x);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  width: 24px;
+  height: 24px;
+}
+
+.errorIcon {
+  color: var(--input-border); /* Uses input/border-error color */
+  width: 24px;
+  height: 24px;
+}
+
+.successIcon {
+  color: var(--input-border); /* Uses status-success/icon color */
+  width: 24px;
+  height: 24px;
+}
+
+/* Helper text styling */
+/* Uses typography.body-small (14px font, 20px line-height) */
+.helperText {
+  font-family: var(--input-font-family, 'Satoshi');
+  font-size: var(--input-font-size-small);
+  line-height: var(--input-line-height-small);
+  color: inherit; /* Set via inline style based on state */
+}
+

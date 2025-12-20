@@ -1,0 +1,121 @@
+/**
+ * Tile Component Styles
+ * 
+ * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
+ * All values come from the design system - no hardcoded colors, spacing, or typography.
+ * 
+ * Maps to Figma Tile component styles:
+ * - Colors: surface, border, and brand-primary-blue tokens
+ * - Typography: Satoshi font family, medium weight (500), h5 font-size/line-height
+ * - Spacing: Design system spacing tokens for padding, border-radius, and gaps
+ * - States: Default, Hover, Selected, Disabled (matching Figma states)
+ */
+
+.tile {
+  /* Base tile styles - all values from design tokens via CSS variables */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Dimensions from Figma */
+  width: var(--tile-width);
+  height: var(--tile-height);
+  border-radius: var(--tile-border-radius);
+  
+  /* Colors from design tokens - Default state by default */
+  /* Maps to Figma Default state: surface.default background, border.default border */
+  background-color: var(--tile-bg);
+  border: 2px solid var(--tile-border);
+  
+  /* Layout */
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  outline: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* Hover state - Maps to Figma Hover state */
+/* Uses status-info/border (light blue #BFDBFE) */
+.tile:not(.tile--disabled):hover {
+  border-color: var(--tile-border-hover);
+}
+
+/* Selected state - Maps to Figma Active/Selected state */
+/* Uses status-info/background, input/border-focus, status-info/text */
+.tile--selected {
+  background-color: var(--tile-bg);
+  border-color: var(--tile-border);
+  color: var(--tile-text);
+}
+
+/* Disabled state - Maps to Figma Disabled state */
+/* Uses button-primary/background-disabled, input/background-disabled, button-primary/text-disabled */
+.tile--disabled {
+  cursor: not-allowed;
+  opacity: 1; /* Colors already handle disabled appearance */
+  background-color: var(--tile-bg);
+  border-color: var(--tile-border);
+  color: var(--tile-text);
+}
+
+.tile--disabled:hover {
+  border-color: var(--tile-border); /* Prevent hover on disabled */
+}
+
+/* Tile content container */
+.tileContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tile-gap);
+  width: 100%;
+  height: 100%;
+}
+
+/* Icon container */
+/* Icon color is applied via CSS variable - icons using currentColor will inherit */
+.tileIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tile-icon-size);
+  height: var(--tile-icon-size);
+  flex-shrink: 0;
+  color: var(--tile-icon);
+  transition: color 0.2s ease;
+}
+
+/* Apply color to SVG icons that use currentColor */
+.tileIcon svg {
+  color: var(--tile-icon);
+  fill: currentColor;
+}
+
+/* Label styling */
+.tileLabel {
+  /* Typography from design tokens */
+  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 20px (h5), Line height = 28px */
+  font-family: var(--tile-font-family, 'Satoshi');
+  font-weight: var(--tile-font-weight, 500);
+  font-size: var(--tile-font-size);
+  line-height: var(--tile-line-height);
+  letter-spacing: var(--tile-letter-spacing);
+  color: var(--tile-text);
+  text-align: center;
+  white-space: pre-wrap;
+  transition: color 0.2s ease;
+}
+
+/* Focus styles for accessibility */
+.tile:focus-visible {
+  outline: 2px solid var(--tile-border);
+  outline-offset: 2px;
+}
+
+.tile--selected:focus-visible {
+  outline-color: var(--tile-border);
+}
+

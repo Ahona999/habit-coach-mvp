@@ -1,0 +1,79 @@
+/**
+ * Button Component Styles
+ * 
+ * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
+ * All values come from the design system - no hardcoded colors, spacing, or typography.
+ * 
+ * Maps to Figma Button component styles:
+ * - Colors: button-primary, button-secondary, button-destructive tokens
+ * - Typography: Satoshi font family, bold weight, size-based font sizes
+ * - Spacing: Design system spacing tokens for padding and border-radius
+ * - States: Default, Hover, Active, Disabled (matching Figma states)
+ */
+
+.button {
+  /* Base styles - all values from design tokens via CSS variables */
+  /* Maps to Figma: Font family = Satoshi, Weight = Bold (700) */
+  font-family: var(--button-font-family, 'Satoshi');
+  font-weight: var(--button-font-weight, 700);
+  
+  /* Typography from design tokens - size varies by button size */
+  /* Maps to Figma: Large (24px), Medium (18px), Small (12px) */
+  font-size: var(--button-font-size);
+  line-height: var(--button-line-height);
+  letter-spacing: var(--button-letter-spacing);
+  
+  /* Spacing from design tokens */
+  /* Maps to Figma: Large (32px/16px), Medium (24px/12px), Small (16px/8px) */
+  padding: var(--button-padding-y) var(--button-padding-x);
+  /* Maps to Figma: Large (12px), Medium (8px), Small (6px) */
+  border-radius: var(--button-border-radius);
+  
+  /* Colors from design tokens - variant and state dependent */
+  /* Maps to Figma: button-primary/background, button-secondary/background, etc. */
+  background-color: var(--button-bg);
+  color: var(--button-color);
+  
+  /* Layout */
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Interactions */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  /* Reset button defaults */
+  outline: none;
+}
+
+/* Hover state - Maps to Figma Hover state */
+/* Uses button-primary/background-hover, button-secondary/background-hover, etc. */
+.button:not(.button--disabled):hover {
+  background-color: var(--button-bg-hover);
+}
+
+/* Active state - Maps to Figma Active state */
+/* Uses button-primary/background-active, button-secondary/background-active, etc. */
+.button:not(.button--disabled):active {
+  background-color: var(--button-bg-active);
+}
+
+/* Focus state - for accessibility */
+.button:focus-visible {
+  outline: 2px solid var(--button-bg);
+  outline-offset: 2px;
+}
+
+/* Disabled state - Maps to Figma Disabled state */
+/* Uses button-primary/background-disabled and button-primary/text-disabled */
+.button--disabled {
+  cursor: not-allowed;
+  opacity: 1; /* Colors already handle disabled appearance */
+}
+
+.button--disabled:hover {
+  background-color: var(--button-bg); /* Prevent hover on disabled */
+}
+
