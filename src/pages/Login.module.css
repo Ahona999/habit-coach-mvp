@@ -1,0 +1,233 @@
+/**
+ * Login Page Styles
+ * 
+ * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
+ * All values come from the design system - no hardcoded colors, spacing, or typography.
+ * 
+ * Maps to Figma Login page design:
+ * - Background: Light blue (#F6F9FC - color '25')
+ * - Card: White background, centered, rounded corners
+ * - Logo: Light blue icon container
+ * - Typography: H2 for title, H6 for subtitle
+ */
+
+.loginPage {
+  /* Full viewport background */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Background color from design tokens */
+  /* Maps to Figma: color '25' (#F6F9FC) */
+  background-color: var(--login-bg, #F6F9FC);
+  
+  /* Padding for mobile */
+  padding: var(--login-page-padding, 16px);
+}
+
+.loginCard {
+  /* Centered card container */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--login-card-width, 712px);
+  max-width: 100%;
+  min-height: var(--login-card-height, 720px);
+  
+  /* Colors from design tokens */
+  background-color: var(--login-card-bg, #FFFFFF);
+  
+  /* Spacing from design tokens */
+  padding: var(--login-card-padding, 16px);
+  border-radius: var(--login-card-radius, 16px);
+  
+  /* Layout */
+  gap: var(--login-card-gap, 56px);
+}
+
+/* Header Section */
+.loginHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--login-header-gap, 24px);
+  width: 100%;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--login-logo-size, 113px);
+  height: var(--login-logo-size, 113px);
+}
+
+.logoIcon {
+  /* Logo icon container with light blue background */
+  /* Maps to Figma: status-info/background (#EFF6FF) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--login-logo-icon-size, 112px);
+  height: var(--login-logo-icon-size, 112px);
+  padding: var(--login-logo-padding, 32px);
+  background-color: var(--login-logo-bg, #EFF6FF);
+  border-radius: var(--login-logo-radius, 16px);
+  color: var(--login-logo-color, #4F46E5);
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--login-title-gap, 16px);
+  text-align: center;
+  width: 100%;
+}
+
+.title {
+  /* Typography from design tokens - H2 */
+  /* Maps to Figma: Font family = Satoshi, Weight = Bold (700), Size = 36px, Line height = 44px */
+  font-family: var(--login-font-family, 'Satoshi');
+  font-weight: var(--login-title-weight, 700);
+  font-size: var(--login-title-size, 36px);
+  line-height: var(--login-title-line-height, 44px);
+  letter-spacing: var(--login-title-letter-spacing, -0.36px);
+  color: var(--login-text-primary, #000000);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.subtitle {
+  /* Typography from design tokens - H6 */
+  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
+  font-family: var(--login-font-family, 'Satoshi');
+  font-weight: var(--login-subtitle-weight, 500);
+  font-size: var(--login-subtitle-size, 18px);
+  line-height: var(--login-subtitle-line-height, 24px);
+  color: var(--login-text-secondary, #666666);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/* Form Section */
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  flex: 1;
+}
+
+.formContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--login-form-gap, 42px);
+  width: var(--login-form-width, 568px);
+  max-width: 100%;
+}
+
+.inputWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--login-input-error-gap, 16px);
+  width: 100%;
+}
+
+.inputSection {
+  width: 100%;
+}
+
+.errorMessage {
+  /* Typography from design tokens - H6 */
+  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
+  font-family: var(--login-font-family, 'Satoshi');
+  font-weight: var(--login-subtitle-weight, 500);
+  font-size: var(--login-subtitle-size, 18px);
+  line-height: var(--login-subtitle-line-height, 24px);
+  color: var(--login-error-text, #B91C1C);
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/* Success State */
+.successWrapper {
+  /* Maps to Figma: gap 16px between input+message wrapper and button */
+  display: flex;
+  flex-direction: column;
+  gap: var(--login-button-gap, 16px);
+  width: 100%;
+}
+
+.successInputMessageWrapper {
+  /* Maps to Figma: gap 42px between input and success message */
+  display: flex;
+  flex-direction: column;
+  gap: var(--login-success-message-gap, 42px);
+  width: 100%;
+}
+
+.successInputWrapper {
+  width: 100%;
+}
+
+.successMessage {
+  /* Typography from design tokens - H6 */
+  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
+  /* Color: semantic-success-green/500 (#22C55E) */
+  font-family: var(--login-font-family, 'Satoshi');
+  font-weight: var(--login-subtitle-weight, 500);
+  font-size: var(--login-subtitle-size, 18px);
+  line-height: var(--login-subtitle-line-height, 24px);
+  color: var(--login-success-text, #22C55E);
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.buttonSection {
+  width: 100%;
+}
+
+.submitButton {
+  width: 100%;
+}
+
+.helperText {
+  /* Typography from design tokens - H6 */
+  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
+  font-family: var(--login-font-family, 'Satoshi');
+  font-weight: var(--login-subtitle-weight, 500);
+  font-size: var(--login-subtitle-size, 18px);
+  line-height: var(--login-subtitle-line-height, 24px);
+  color: var(--login-text-secondary, #666666);
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .loginCard {
+    width: 100%;
+    min-height: auto;
+    padding: var(--login-card-padding-mobile, 24px);
+  }
+  
+  .formContent {
+    width: 100%;
+  }
+}
+

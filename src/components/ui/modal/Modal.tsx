@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { designSystem } from '../../../design-system';
 import { Button } from '../button';
+// @ts-ignore - CSS module types are declared in global.d.ts
 import styles from './Modal.module.css';
 
 // Get design tokens - using light mode by default
