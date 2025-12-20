@@ -136,45 +136,61 @@ export const Modal: React.FC<ModalProps> = ({
     } as React.CSSProperties;
   }, [theme, typography, spacing]);
 
-  // Focus trap: Store the previously focused element
+  // Focus trap: Store the previously focused element and restore on close
   useEffect(() => {
     if (isOpen) {
       previousActiveElement.current = document.activeElement as HTMLElement;
     } else if (previousActiveElement.current) {
-      previousActiveElement.current.focus();
+      // Only restore focus if element is still in the DOM
+      if (document.body.contains(previousActiveElement.current)) {
+        previousActiveElement.current.focus();
+      }
+      previousActiveElement.current = null;
     }
   }, [isOpen]);
 
-  // Focus trap: Focus first focusable element when modal opens
+  // Focus trap: Focus close button when modal opens
   useEffect(() => {
     if (isOpen && modalRef.current) {
-      const focusableElements = modalRef.current.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      const firstElement = focusableElements[0] as HTMLElement;
-      if (firstElement) {
-        firstElement.focus();
+      // Focus the close button first (best UX)
+      const closeButton = modalRef.current.querySelector(
+        '[aria-label="Close modal"]'
+      ) as HTMLElement;
+      if (closeButton) {
+        closeButton.focus();
+      } else {
+        // Fallback to first focusable element
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0] as HTMLElement;
+        if (firstElement) {
+          firstElement.focus();
+        }
       }
     }
   }, [isOpen]);
 
-  // Handle Escape key
+  // Handle Escape key and body scroll lock
   useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
         onClose();
       }
     };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
-    }
+    // Prevent body scroll when modal is open
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleEscape);
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+      document.body.style.overflow = originalOverflow;
     };
   }, [isOpen, onClose]);
 
@@ -207,7 +223,7 @@ export const Modal: React.FC<ModalProps> = ({
     >
       <div
         ref={modalRef}
-        className={`${styles.modal} ${className}`}
+        className={className ? `${styles.modal} ${className}` : styles.modal}
         style={cssVariables}
         onClick={(e) => e.stopPropagation()}
       >
