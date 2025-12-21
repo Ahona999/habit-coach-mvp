@@ -1,5 +1,8 @@
-import Login from "./Login";
+await supabase.auth.signInWithOtp({
+  email,
+  options: {
+    emailRedirectTo: import.meta.env.VITE_SITE_URL,
+  },
+});
 
-export default function Auth() {
-  return <Login />;
-}
+console.log("OTP sent to:", email);
