@@ -8,10 +8,20 @@ export default function Auth() {
   // idle | loading | error | success
   const [errorMessage, setErrorMessage] = useState("");
 
+  const validateEmail = (emailValue) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(emailValue);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!email) return;
+    // Validate email format
+    if (!email || !validateEmail(email)) {
+      setStatus("error");
+      setErrorMessage("Please enter a valid email address");
+      return;
+    }
 
     setStatus("loading");
     setErrorMessage("");
@@ -33,11 +43,12 @@ export default function Auth() {
 
   return (
     <Login
-      email={email}
-      setEmail={setEmail}
-      status={status}
-      errorMessage={errorMessage}
-      onSubmit={handleLogin}
-    />
-  );
+   email={email}
+   onEmailChange={setEmail}
+   status={status}
+   errorMessage={errorMessage}
+   onSubmit={handleLogin}
+ />
+ );
 }
+
