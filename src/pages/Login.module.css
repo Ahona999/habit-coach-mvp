@@ -1,235 +1,90 @@
-/**
- * Login Page Styles
- * 
- * Uses CSS custom properties (CSS variables) set via inline styles from design tokens.
- * All values come from the design system - no hardcoded colors, spacing, or typography.
- * 
- * Maps to Figma Login page design:
- * - Background: Light blue (#F6F9FC - color '25')
- * - Card: White background, centered, rounded corners
- * - Logo: Light blue icon container
- * - Typography: H2 for title, H6 for subtitle
- */
-
-.loginPage {
-  /* Full viewport background */
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  /* Background color from design tokens */
-  /* Maps to Figma: color '25' (#F6F9FC) */
-  background-color: var(--login-bg, #F6F9FC);
-  
-  /* Padding for mobile */
-  padding: var(--login-page-padding, 16px);
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #f6f9fc;
 }
 
-.loginCard {
-  /* Card container - centered white card */
-  /* Maps to Figma: White background, rounded corners, fixed dimensions */
-  background-color: var(--login-card-bg, #FFFFFF);
-  width: var(--login-card-width, 712px);
-  min-height: var(--login-card-height, 720px);
-  max-width: 100%;
-  border-radius: var(--login-card-radius, 16px);
-  padding: var(--login-card-padding, 16px);
-  
-  /* Layout */
+.card {
+  width: 420px;
+  padding: 48px;
+  background: #ffffff;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--login-card-gap, 56px);
-  
-  /* Shadow for depth (optional, from design system if available) */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  gap: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-
-/* Header Section */
-.loginHeader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--login-header-gap, 24px);
-  width: 100%;
-}
-
-.logoContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--login-logo-size, 113px);
-  height: var(--login-logo-size, 113px);
-}
-
-.logoIcon {
-  /* Logo icon container with light blue background */
-  /* Maps to Figma: status-info/background (#EFF6FF) */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--login-logo-icon-size, 112px);
-  height: var(--login-logo-icon-size, 112px);
-  padding: var(--login-logo-padding, 32px);
-  background-color: var(--login-logo-bg, #EFF6FF);
-  border-radius: var(--login-logo-radius, 16px);
-  color: var(--login-logo-color, #4F46E5);
-}
-
-.titleSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--login-title-gap, 16px);
-  text-align: center;
-  width: 100%;
+.logoBox {
+  width: 96px;
+  height: 96px;
+  border-radius: 16px;
+  background: #eff6ff;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
 }
 
 .title {
-  /* Typography from design tokens - H2 */
-  /* Maps to Figma: Font family = Satoshi, Weight = Bold (700), Size = 36px, Line height = 44px */
-  font-family: var(--login-font-family, 'Satoshi');
-  font-weight: var(--login-title-weight, 700);
-  font-size: var(--login-title-size, 36px);
-  line-height: var(--login-title-line-height, 44px);
-  letter-spacing: var(--login-title-letter-spacing, -0.36px);
-  color: var(--login-text-primary, #000000);
+  font-size: 32px;
+  font-weight: 700;
   margin: 0;
-  padding: 0;
-  width: 100%;
 }
 
 .subtitle {
-  /* Typography from design tokens - H6 */
-  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
-  font-family: var(--login-font-family, 'Satoshi');
-  font-weight: var(--login-subtitle-weight, 500);
-  font-size: var(--login-subtitle-size, 18px);
-  line-height: var(--login-subtitle-line-height, 24px);
-  color: var(--login-text-secondary, #666666);
-  margin: 0;
-  padding: 0;
-  width: 100%;
-}
-
-/* Form Section */
-.loginForm {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  flex: 1;
-}
-
-.formContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--login-form-gap, 42px);
-  width: var(--login-form-width, 568px);
-  max-width: 100%;
-}
-
-.inputWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: var(--login-input-error-gap, 16px);
-  width: 100%;
-}
-
-.inputSection {
-  width: 100%;
-}
-
-.errorMessage {
-  /* Typography from design tokens - H6 */
-  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
-  font-family: var(--login-font-family, 'Satoshi');
-  font-weight: var(--login-subtitle-weight, 500);
-  font-size: var(--login-subtitle-size, 18px);
-  line-height: var(--login-subtitle-line-height, 24px);
-  color: var(--login-error-text, #B91C1C);
+  color: #6b7280;
+  margin-top: -12px;
   text-align: center;
-  margin: 0;
-  padding: 0;
-  width: 100%;
 }
 
-/* Success State */
-.successWrapper {
-  /* Maps to Figma: gap 16px between input+message wrapper and button */
+.form {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--login-button-gap, 16px);
-  width: 100%;
+  gap: 16px;
+  margin-top: 16px;
 }
 
-.successInputMessageWrapper {
-  /* Maps to Figma: gap 42px between input and success message */
-  display: flex;
-  flex-direction: column;
-  gap: var(--login-success-message-gap, 42px);
-  width: 100%;
+.input {
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 0 16px;
+  font-size: 16px;
 }
 
-.successInputWrapper {
-  width: 100%;
+.button {
+  height: 48px;
+  border-radius: 12px;
+  border: none;
+  background: #4f46e5;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.successMessage {
-  /* Typography from design tokens - H6 */
-  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
-  /* Color: semantic-success-green/500 (#22C55E) */
-  font-family: var(--login-font-family, 'Satoshi');
-  font-weight: var(--login-subtitle-weight, 500);
-  font-size: var(--login-subtitle-size, 18px);
-  line-height: var(--login-subtitle-line-height, 24px);
-  color: var(--login-success-text, #22C55E);
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 14px;
   text-align: center;
-  margin: 0;
-  padding: 0;
-  width: 100%;
 }
 
-.buttonSection {
-  width: 100%;
-}
-
-.submitButton {
-  width: 100%;
-}
-
-.helperText {
-  /* Typography from design tokens - H6 */
-  /* Maps to Figma: Font family = Satoshi, Weight = Medium (500), Size = 18px, Line height = 24px */
-  font-family: var(--login-font-family, 'Satoshi');
-  font-weight: var(--login-subtitle-weight, 500);
-  font-size: var(--login-subtitle-size, 18px);
-  line-height: var(--login-subtitle-line-height, 24px);
-  color: var(--login-text-secondary, #666666);
+.success {
+  color: #16a34a;
+  font-size: 16px;
   text-align: center;
-  margin: 0;
-  padding: 0;
-  width: 100%;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .loginCard {
-    width: 100%;
-    min-height: auto;
-    padding: var(--login-card-padding-mobile, 24px);
-  }
-  
-  .formContent {
-    width: 100%;
-  }
+.helper {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 8px;
 }
-
