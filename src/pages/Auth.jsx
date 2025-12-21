@@ -1,12 +1,5 @@
-const { data, error } = await supabase.auth.signInWithOtp({
-  email,
-  options: {
-    emailRedirectTo: window.location.origin,
-  },
-});
+import Login from "./Login";
 
-console.log({ data, error });
-
-
-
-
+export default function Auth() {
+  return <Login />;
+}
