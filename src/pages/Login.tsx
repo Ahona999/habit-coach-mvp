@@ -3,7 +3,8 @@ import type { CSSProperties, FormEvent } from 'react';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { designSystem } from '../design-system';
-// @ts-ignore - CSS module types are declared in global.d.ts
+import { supabase } from '../lib/supabaseClient';
+// @ts-ignore
 import styles from './Login.module.css';
 
 // Design tokens
@@ -11,33 +12,14 @@ const theme = designSystem.colors.light;
 const spacing = designSystem.spacing;
 const typography = designSystem.typography;
 
-/**
- * Login Page
- * Magic-link authentication screen for Bloom.
- */
 export function Login() {
   const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'success'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Email validation function
-  const validateEmail = (emailValue: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(emailValue);
-  };
+  const validateEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  // Handle email change
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEmail = e.target.value;
-    setEmail(newEmail);
-    // Clear error when user starts typing after a failed submit
-    if (emailError && hasAttemptedSubmit) {
-      setEmailError(null);
-    }
-  };
-
-  // CSS variables mapped from design system (Figma → Code)
   const cssVariables = useMemo(
     () =>
       ({
@@ -67,39 +49,45 @@ export function Login() {
 
         '--login-text-primary': theme.text.primary,
         '--login-text-secondary': theme.text.secondary,
-        '--login-error-text': theme['status-error'].text, // #B91C1C - error text color
-        '--login-success-text': theme['semantic-success-green']['500'], // #22C55E - success message color
+        '--login-error-text': theme['status-error'].text,
+        '--login-success-text': theme['semantic-success-green']['500'],
 
         '--login-subtitle-weight': typography.fontWeight.medium,
         '--login-subtitle-size': `${typography.fontSize.h6}px`,
         '--login-subtitle-line-height': `${typography.lineHeight.h6}px`,
 
         '--login-form-width': '568px',
-        '--login-form-gap': isSuccess ? '36px' : emailError ? '36px' : '42px', // 36px when error/success, 42px default
-        '--login-input-error-gap': `${spacing[16]}px`, // 16px gap between input and error/success message
-        '--login-success-message-gap': '42px', // 42px gap between input and success message
-        '--login-button-gap': `${spacing[16]}px`, // 16px gap between success message and button
+        '--login-form-gap': status !== 'idle' ? '36px' : '42px',
       }) as CSSProperties,
-    [emailError, isSuccess, spacing, typography, theme]
+    [status]
   );
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setHasAttemptedSubmit(true);
 
-    // Validate email
-    if (!email.trim() || !validateEmail(email)) {
-      setEmailError('Please enter a valid email address');
-      setIsSuccess(false);
+    if (!validateEmail(email)) {
+      setErrorMessage('Please enter a valid email address');
+      setStatus('error');
       return;
     }
 
-    // Clear error if email is valid
-    setEmailError(null);
-    // Show success state
-    setIsSuccess(true);
-    // TODO: Supabase magic link auth
-    console.log('Email submitted:', email);
+    setStatus('loading');
+    setErrorMessage(null);
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: window.location.origin,
+      },
+    });
+
+    if (error) {
+      setErrorMessage(error.message);
+      setStatus('error');
+      return;
+    }
+
+    setStatus('success');
   };
 
   return (
@@ -109,23 +97,8 @@ export function Login() {
         <div className={styles.loginHeader}>
           <div className={styles.logoContainer}>
             <div className={styles.logoIcon}>
-              {/* Bloom logo placeholder */}
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 48 48"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect width="48" height="48" rx="8" fill="currentColor" />
-                <path
-                  d="M24 16C20 16 16 18 16 22C16 26 20 28 24 28C28 28 32 26 32 22C32 18 28 16 24 16Z"
-                  fill="white"
-                />
-                <path
-                  d="M24 20C22 20 20 21 20 22C20 23 22 24 24 24C26 24 28 23 28 22C28 21 26 20 24 20Z"
-                  fill="currentColor"
-                />
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor">
+                <rect width="48" height="48" rx="8" />
               </svg>
             </div>
           </div>
@@ -139,41 +112,17 @@ export function Login() {
         </div>
 
         {/* Form */}
-        {isSuccess ? (
+        {status === 'success' ? (
           <div className={styles.loginForm}>
             <div className={styles.formContent}>
-              {/* Success State */}
-              <div className={styles.successWrapper}>
-                <div className={styles.successInputMessageWrapper}>
-                  <div className={styles.successInputWrapper}>
-                    <Input
-                      id="email-success"
-                      name="email"
-                      type="email"
-                      value={email}
-                      readOnly
-                      state="success"
-                    />
-                  </div>
-                  <p className={styles.successMessage} style={cssVariables}>
-                    Magic link sent! Check your inbox
-                  </p>
-                </div>
+              <Input value={email} readOnly state="success" />
+              <p className={styles.successMessage}>
+                Magic link sent! Check your inbox
+              </p>
 
-                <div className={styles.buttonSection}>
-                  <Button
-                    variant="primary"
-                    size="large"
-                    className={styles.submitButton}
-                    onClick={() => {
-                      // Could navigate to email or show instructions
-                      console.log('Check email clicked');
-                    }}
-                  >
-                    Check your email
-                  </Button>
-                </div>
-              </div>
+              <Button size="large" variant="primary">
+                Check your email
+              </Button>
 
               <p className={styles.helperText}>
                 No passwords. Just good habits.
@@ -183,36 +132,26 @@ export function Login() {
         ) : (
           <form className={styles.loginForm} onSubmit={handleSubmit}>
             <div className={styles.formContent}>
-              <div className={styles.inputWrapper}>
-                <div className={styles.inputSection}>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={handleEmailChange}
-                    state={emailError ? 'error' : 'default'}
-                  />
-                </div>
-                {emailError && (
-                  <p className={styles.errorMessage} style={cssVariables}>
-                    Please enter a valid email address
-                  </p>
-                )}
-              </div>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                state={status === 'error' ? 'error' : 'default'}
+              />
 
-              <div className={styles.buttonSection}>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="large"
-                  className={styles.submitButton}
-                >
-                  Send magic link
-                </Button>
-              </div>
+              {errorMessage && (
+                <p className={styles.errorMessage}>{errorMessage}</p>
+              )}
+
+              <Button
+                type="submit"
+                size="large"
+                variant="primary"
+                disabled={status === 'loading'}
+              >
+                {status === 'loading' ? 'Sending…' : 'Send magic link'}
+              </Button>
 
               <p className={styles.helperText}>
                 No passwords. Just good habits.
@@ -224,3 +163,4 @@ export function Login() {
     </div>
   );
 }
+
