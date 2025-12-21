@@ -31,24 +31,26 @@
 }
 
 .loginCard {
-  /* Centered card container */
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: var(--login-card-width, 712px);
-  max-width: 100%;
-  min-height: var(--login-card-height, 720px);
-  
-  /* Colors from design tokens */
+  /* Card container - centered white card */
+  /* Maps to Figma: White background, rounded corners, fixed dimensions */
   background-color: var(--login-card-bg, #FFFFFF);
-  
-  /* Spacing from design tokens */
-  padding: var(--login-card-padding, 16px);
+  width: var(--login-card-width, 712px);
+  min-height: var(--login-card-height, 720px);
+  max-width: 100%;
   border-radius: var(--login-card-radius, 16px);
+  padding: var(--login-card-padding, 16px);
   
   /* Layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: var(--login-card-gap, 56px);
+  
+  /* Shadow for depth (optional, from design system if available) */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
+
 
 /* Header Section */
 .loginHeader {
