@@ -1,9 +1,10 @@
-import Login from "./Login";
+await supabase.auth.signInWithOtp({
+  email,
+  options: {
+    emailRedirectTo: window.location.origin,
+  },
+});
 
-
-export default function Auth() {
-  return <Login />;
-}
 
 
 
