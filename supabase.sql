@@ -5,7 +5,7 @@ create extension if not exists "uuid-ossp";
 -- We reference auth.users, no need to create users table
 
 -- HABITS TABLE
-create table habits (
+create table if not exists habits (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid references auth.users(id) on delete cascade,
   title text not null,
@@ -14,7 +14,7 @@ create table habits (
 );
 
 -- HABIT CHECKINS
-create table habit_checkins (
+create table if not exists habit_checkins (
   id uuid primary key default uuid_generate_v4(),
   habit_id uuid references habits(id) on delete cascade,
   completed_on date not null,
@@ -22,7 +22,7 @@ create table habit_checkins (
 );
 
 -- USER PROFILES TABLE
-create table user_profiles (
+create table if not exists user_profiles (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid references auth.users(id) on delete cascade unique not null,
   selected_goal text,
@@ -35,6 +35,11 @@ create table user_profiles (
 alter table habits enable row level security;
 alter table habit_checkins enable row level security;
 alter table user_profiles enable row level security;
+
+-- Drop existing policies if they exist (to avoid duplicates)
+drop policy if exists "Users can manage their habits" on habits;
+drop policy if exists "Users can manage their habit checkins" on habit_checkins;
+drop policy if exists "Users can manage their own profile" on user_profiles;
 
 -- Policies: users can only see their own habits
 create policy "Users can manage their habits"
