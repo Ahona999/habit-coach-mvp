@@ -1,16 +1,33 @@
-<Routes>
-  <Route path="/" element={<Auth />} />
+import { Routes, Route, Navigate } from "react-router-dom";
+import Auth from "./pages/Auth";
+import Login from "./pages/Login";
+import Onboarding from "./pages/Onboarding";
+import Dashboard from "./pages/Dashboard";
 
-  <Route
-    path="/onboarding"
-    element={session ? <Onboarding /> : <Navigate to="/" replace />}
-  />
+export default function App() {
+  const session = true; // TEMP: replace with Supabase session later
 
-  <Route
-    path="/dashboard"
-    element={session ? <Dashboard /> : <Navigate to="/" replace />}
-  />
+  return (
+    <Routes>
+      {/* Auth */}
+      <Route path="/" element={<Auth />} />
+      <Route path="/login" element={<Login />} />
 
-  <Route path="*" element={<Navigate to="/" replace />} />
-</Routes>
+      {/* Onboarding (protected) */}
+      <Route
+        path="/onboarding"
+        element={session ? <Onboarding /> : <Navigate to="/login" replace />}
+      />
+
+      {/* Dashboard */}
+      <Route
+        path="/dashboard"
+        element={session ? <Dashboard /> : <Navigate to="/login" replace />}
+      />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
 
