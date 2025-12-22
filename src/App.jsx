@@ -9,17 +9,48 @@ import Dashboard from "./pages/Dashboard";
 export default function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    const initializeAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setSession(session);
+
+      // Check if onboarding is completed
+      if (session?.user) {
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("onboarding_completed")
+          .eq("user_id", session.user.id)
+          .single();
+
+        setOnboardingCompleted(data?.onboarding_completed || false);
+      }
+
       setLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
+
+      // Check onboarding status when auth state changes
+      if (session?.user) {
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("onboarding_completed")
+          .eq("user_id", session.user.id)
+          .single();
+
+        setOnboardingCompleted(data?.onboarding_completed || false);
+      } else {
+        setOnboardingCompleted(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -27,25 +58,58 @@ export default function App() {
 
   if (loading) return null;
 
+  // Determine redirect path for authenticated users
+  const getAuthRedirect = () => {
+    if (!session) return "/";
+    if (!onboardingCompleted) return "/onboarding";
+    return "/dashboard";
+  };
+
   return (
     <Routes>
       {/* Auth */}
       <Route
         path="/"
-        element={session ? <Navigate to="/onboarding" replace /> : <Auth />}
+        element={
+          session ? (
+            <Navigate to={getAuthRedirect()} replace />
+          ) : (
+            <Auth />
+          )
+        }
       />
       <Route path="/login" element={<Login />} />
 
-      {/* Onboarding (protected) */}
+      {/* Onboarding (protected, only if not completed) */}
       <Route
         path="/onboarding"
-        element={session ? <Onboarding /> : <Navigate to="/" replace />}
+        element={
+          session ? (
+            onboardingCompleted ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Onboarding />
+            )
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
       />
 
       {/* Dashboard */}
       <Route
         path="/dashboard"
-        element={session ? <Dashboard /> : <Navigate to="/" replace />}
+        element={
+          session ? (
+            onboardingCompleted ? (
+              <Dashboard />
+            ) : (
+              <Navigate to="/onboarding" replace />
+            )
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
       />
 
       {/* Fallback */}

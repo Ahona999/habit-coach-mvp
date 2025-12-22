@@ -21,9 +21,20 @@ create table habit_checkins (
   created_at timestamp with time zone default now()
 );
 
+-- USER PROFILES TABLE
+create table user_profiles (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id) on delete cascade unique not null,
+  selected_goal text,
+  onboarding_completed boolean default false,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
 -- Enable Row Level Security
 alter table habits enable row level security;
 alter table habit_checkins enable row level security;
+alter table user_profiles enable row level security;
 
 -- Policies: users can only see their own habits
 create policy "Users can manage their habits"
@@ -39,3 +50,9 @@ using (
     select id from habits where user_id = auth.uid()
   )
 );
+
+-- Policies: users can only manage their own profile
+create policy "Users can manage their own profile"
+on user_profiles
+for all
+using (auth.uid() = user_id);

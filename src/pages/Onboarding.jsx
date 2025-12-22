@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabaseClient";
 import GoalStep from "../components/onboarding/GoalStep";
 import AIStep from "../components/onboarding/AIStep";
 
@@ -18,7 +19,22 @@ export default function Onboarding() {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    // Save goal and mark onboarding as complete
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      // Upsert user profile: update if exists, insert if not
+      await supabase.from("user_profiles").upsert({
+        user_id: user.id,
+        selected_goal: selectedGoal,
+        onboarding_completed: true,
+        updated_at: new Date().toISOString(),
+      });
+    }
+
     navigate("/dashboard");
   };
 
