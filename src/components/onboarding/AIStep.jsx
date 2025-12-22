@@ -16,11 +16,11 @@ export default function AIStep({ onFinish }) {
           maxWidth: "712px",
           background: "#ffffff",
           borderRadius: "16px",
-          padding: "96px 32px",
+          padding: "48px 32px",
           boxShadow: "0px 4px 12px 0px rgba(0, 0, 0, 0.15)",
           display: "flex",
           flexDirection: "column",
-          gap: "53px",
+          gap: "32px",
         }}
       >
         {/* Header */}
@@ -29,7 +29,7 @@ export default function AIStep({ onFinish }) {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "24px",
+            gap: "20px",
             textAlign: "center",
           }}
         >
@@ -62,17 +62,16 @@ export default function AIStep({ onFinish }) {
           {/* Icon Container */}
           <div
             style={{
-              width: "84px",
-              height: "84px",
+              width: "80px",
+              height: "80px",
               background: "#eff6ff",
               borderRadius: "16px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: "24px",
             }}
           >
-            <div style={{ fontSize: "36px" }}>🛡️</div>
+            <div style={{ fontSize: "40px" }}>🛡️</div>
           </div>
 
           <h1
@@ -110,7 +109,7 @@ export default function AIStep({ onFinish }) {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "42px",
+            gap: "24px",
             width: "100%",
             maxWidth: "568px",
             margin: "0 auto",
@@ -148,15 +147,15 @@ export default function AIStep({ onFinish }) {
             onClick={onFinish}
             style={{
               width: "100%",
-              height: "56px",
+              height: "48px",
               background: "#4f46e5",
               color: "#ffffff",
               border: "none",
               borderRadius: "12px",
               fontFamily: "Satoshi, sans-serif",
-              fontSize: "24px",
-              fontWeight: 700,
-              lineHeight: "32px",
+              fontSize: "16px",
+              fontWeight: 600,
+              lineHeight: "24px",
               cursor: "pointer",
               transition: "opacity 0.2s ease",
             }}

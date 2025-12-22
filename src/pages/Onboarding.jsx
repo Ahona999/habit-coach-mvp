@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import GoalStep from "../components/onboarding/GoalStep";
 import AIStep from "../components/onboarding/AIStep";
 
 export default function Onboarding() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [selectedGoal, setSelectedGoal] = useState(null);
 
@@ -17,7 +19,7 @@ export default function Onboarding() {
   };
 
   const handleFinish = () => {
-    console.log("Onboarding completed");
+    navigate("/dashboard");
   };
 
   if (step === 1) {
