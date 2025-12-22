@@ -86,7 +86,7 @@ export default function AIStep({ onFinish }) {
               margin: 0,
             }}
           >
-            Your AI Habit Coach
+            Let AI help you stay consistent
           </h1>
           <p
             style={{
@@ -167,7 +167,7 @@ export default function AIStep({ onFinish }) {
               e.target.style.opacity = "1";
             }}
           >
-            Take me to dashboard
+            Go to Dashboard
           </button>
         </div>
       </div>
