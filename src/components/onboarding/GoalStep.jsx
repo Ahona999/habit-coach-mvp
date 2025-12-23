@@ -41,7 +41,7 @@ export default function GoalStep({ selectedGoal, onSelect, onNext }) {
           gap: "32px",
         }}
       >
-        {/* Progress Indicator */}
+        {/* Progress Indicator - 1 of 3 active */}
         <div
           style={{
             display: "flex",
@@ -55,6 +55,14 @@ export default function GoalStep({ selectedGoal, onSelect, onNext }) {
               width: "39px",
               height: "9px",
               background: "#4f46e5",
+              borderRadius: "12px",
+            }}
+          />
+          <div
+            style={{
+              width: "39px",
+              height: "9px",
+              background: "#e5e5e5",
               borderRadius: "12px",
             }}
           />

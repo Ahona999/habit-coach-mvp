@@ -33,7 +33,7 @@ export default function AIStep({ onFinish }) {
             textAlign: "center",
           }}
         >
-          {/* Progress Indicator - Both bars active */}
+          {/* Progress Indicator - All 3 bars active */}
           <div
             style={{
               display: "flex",
@@ -41,6 +41,14 @@ export default function AIStep({ onFinish }) {
               alignItems: "center",
             }}
           >
+            <div
+              style={{
+                width: "39px",
+                height: "9px",
+                background: "#4f46e5",
+                borderRadius: "12px",
+              }}
+            />
             <div
               style={{
                 width: "39px",
