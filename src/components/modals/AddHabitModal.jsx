@@ -69,6 +69,10 @@ export default function AddHabitModal({ isOpen, onClose, defaultHabit, onSuccess
     ? `Add new habit: ${defaultHabit.name}`
     : "Add a new habit";
 
+  useEffect(() => {
+    console.log("AddHabitModal - isOpen changed to:", isOpen);
+  }, [isOpen]);
+  
   return (
     <Modal
       isOpen={isOpen}

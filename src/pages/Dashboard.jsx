@@ -93,10 +93,16 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+  // Debug modal state
+  useEffect(() => {
+    console.log("Modal state changed - isAddHabitOpen:", isAddHabitOpen);
+  }, [isAddHabitOpen]);
+
   const handleOpenModal = (habit = null) => {
     console.log("Opening modal with habit:", habit);
     setSelectedHabitTemplate(habit);
     setIsAddHabitOpen(true);
+    console.log("Modal state set to true, isAddHabitOpen should be:", true);
   };
 
   const handleCloseModal = () => {
@@ -217,10 +223,19 @@ export default function Dashboard() {
               gap: "16px",
               textAlign: "center",
               width: "100%",
-              maxWidth: "500px",
+              maxWidth: "1196px",
               padding: "16px 32px",
             }}
           >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px",
+                width: "100%",
+                maxWidth: "500px",
+              }}
+            >
             <h1
               style={{
                 fontFamily: "Satoshi, sans-serif",
@@ -246,6 +261,7 @@ export default function Dashboard() {
             >
               Let's start building habits that stick!
             </p>
+            </div>
           </div>
 
           <div
