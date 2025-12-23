@@ -119,6 +119,10 @@ export default function Dashboard() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -188,18 +192,20 @@ export default function Dashboard() {
           }}
           collapsed={isNavbarCollapsed}
           onToggle={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
+          onLogout={handleLogout}
         />
 
         <div
           style={{
             flex: 1,
             marginLeft: isNavbarCollapsed ? "77px" : "241px",
-            padding: "86px 0 0 0",
+            paddingTop: "86px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             gap: "43px",
             transition: "margin-left 0.2s ease",
+            width: "100%",
           }}
         >
           <div
@@ -207,9 +213,12 @@ export default function Dashboard() {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              justifyContent: "center",
               gap: "16px",
               textAlign: "center",
+              width: "100%",
               maxWidth: "500px",
+              padding: "16px 32px",
             }}
           >
             <h1
@@ -246,7 +255,7 @@ export default function Dashboard() {
               gap: "48px",
               width: "100%",
               maxWidth: "1132px",
-              padding: "0",
+              padding: "0 32px",
             }}
           >
             {/* Welcome Card */}
@@ -505,6 +514,7 @@ export default function Dashboard() {
         }}
         collapsed={isNavbarCollapsed}
         onToggle={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
+        onLogout={handleLogout}
       />
 
       <div
