@@ -13,25 +13,42 @@ export default function App() {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setSession(session);
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Error getting session:", sessionError);
+          setLoading(false);
+          return;
+        }
+        
+        setSession(session);
 
-      // Check if onboarding is completed
-      if (session?.user) {
-        const { data, error } = await supabase
-          .from("user_profiles")
-          .select("onboarding_completed")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
+        // Check if onboarding is completed
+        if (session?.user) {
+          const { data, error } = await supabase
+            .from("user_profiles")
+            .select("onboarding_completed")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
 
-        // If profile exists and onboarding is completed, set to true
-        // If no profile exists (new user) or onboarding not completed, set to false
-        setOnboardingCompleted(data?.onboarding_completed === true);
+          if (error) {
+            console.error("Error fetching user profile:", error);
+          }
+
+          // If profile exists and onboarding is completed, set to true
+          // If no profile exists (new user) or onboarding not completed, set to false
+          setOnboardingCompleted(data?.onboarding_completed === true);
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     initializeAuth();
@@ -81,7 +98,20 @@ export default function App() {
     };
   }, []);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div style={{ 
+        minHeight: "100vh", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center",
+        fontFamily: "Satoshi, sans-serif",
+        color: "#666"
+      }}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   // Determine redirect path for authenticated users
   const getAuthRedirect = () => {
