@@ -47,6 +47,12 @@ export interface ModalProps {
   secondaryActionLabel?: string;
   
   /**
+   * Whether the primary action button is disabled
+   * @default false
+   */
+  primaryActionDisabled?: boolean;
+  
+  /**
    * Modal body content
    */
   children: React.ReactNode;
@@ -110,6 +116,7 @@ export const Modal: React.FC<ModalProps> = ({
   onPrimaryAction,
   primaryActionLabel = 'Add Habit',
   secondaryActionLabel = 'Cancel',
+  primaryActionDisabled = false,
   children,
   className = '',
 }) => {
@@ -262,6 +269,7 @@ export const Modal: React.FC<ModalProps> = ({
             variant="primary"
             size="medium"
             onClick={handlePrimaryAction}
+            disabled={primaryActionDisabled}
             style={{ width: '323px' }} // Matches Figma button width
           >
             {primaryActionLabel}
