@@ -55,6 +55,7 @@ export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [isAddHabitOpen, setIsAddHabitOpen] = useState(false);
   const [selectedHabitTemplate, setSelectedHabitTemplate] = useState(null);
+  const [isNavbarCollapsed, setIsNavbarCollapsed] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,6 +94,7 @@ export default function Dashboard() {
   }, []);
 
   const handleOpenModal = (habit = null) => {
+    console.log("Opening modal with habit:", habit);
     setSelectedHabitTemplate(habit);
     setIsAddHabitOpen(true);
   };
@@ -184,16 +186,20 @@ export default function Dashboard() {
             name: userName,
             plan: "Free Plan",
           }}
+          collapsed={isNavbarCollapsed}
+          onToggle={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
         />
 
         <div
           style={{
             flex: 1,
+            marginLeft: isNavbarCollapsed ? "77px" : "241px",
             padding: "86px 0 0 0",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             gap: "43px",
+            transition: "margin-left 0.2s ease",
           }}
         >
           <div
@@ -240,7 +246,7 @@ export default function Dashboard() {
               gap: "48px",
               width: "100%",
               maxWidth: "1132px",
-              padding: "0 32px",
+              padding: "0",
             }}
           >
             {/* Welcome Card */}
@@ -349,10 +355,10 @@ export default function Dashboard() {
                     transition: "opacity 0.2s ease",
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.opacity = "0.9";
+                    e.currentTarget.style.opacity = "0.9";
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.opacity = "1";
+                    e.currentTarget.style.opacity = "1";
                   }}
                 >
                   Create First Habit
@@ -414,7 +420,7 @@ export default function Dashboard() {
                   style={{
                     display: "flex",
                     gap: "56px",
-                    flexWrap: "wrap",
+                    justifyContent: "flex-start",
                   }}
                 >
                   {popularHabits.slice(0, 3).map((habit) => (
@@ -430,7 +436,7 @@ export default function Dashboard() {
                   style={{
                     display: "flex",
                     gap: "56px",
-                    flexWrap: "wrap",
+                    justifyContent: "flex-start",
                   }}
                 >
                   {popularHabits.slice(3, 6).map((habit) => (
@@ -497,15 +503,19 @@ export default function Dashboard() {
           name: userName,
           plan: "Free Plan",
         }}
+        collapsed={isNavbarCollapsed}
+        onToggle={() => setIsNavbarCollapsed(!isNavbarCollapsed)}
       />
 
       <div
         style={{
           flex: 1,
+          marginLeft: isNavbarCollapsed ? "77px" : "241px",
           padding: "0",
           display: "flex",
           flexDirection: "column",
           gap: "4px",
+          transition: "margin-left 0.2s ease",
         }}
       >
         {/* Header with greeting and Add Habit button */}
