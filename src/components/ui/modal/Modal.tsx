@@ -135,9 +135,9 @@ export const Modal: React.FC<ModalProps> = ({
       '--modal-title-line-height': `${typography.lineHeight.h3}px`, // 36px - matches Figma
       '--modal-title-font-weight': typography.fontWeight.bold, // 700
       '--modal-title-letter-spacing': `${typography.letterSpacing.h3}px`, // -0.28px
-      '--modal-padding-x': `${spacing[32]}px`, // 32px horizontal - matches Figma
-      '--modal-padding-y': `${spacing[28]}px`, // 28px vertical - matches Figma
-      '--modal-gap': `${spacing[28]}px`, // 28px gap between sections - matches Figma
+      '--modal-padding-x': '32px', // 32px horizontal - matches Figma
+      '--modal-padding-y': '28px', // 28px vertical - matches Figma
+      '--modal-gap': '28px', // 28px gap between sections - matches Figma
       '--modal-border-radius': '16px', // 16px border radius from Figma
       '--modal-width': '662px', // 662px width from Figma
       '--modal-shadow': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', // Subtle shadow
