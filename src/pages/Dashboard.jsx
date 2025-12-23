@@ -775,6 +775,7 @@ export default function Dashboard() {
         isOpen={isAddHabitOpen}
         onClose={handleCloseModal}
         defaultHabit={selectedHabitTemplate}
+        onSuccess={handleHabitAdded}
       />
     </div>
   );

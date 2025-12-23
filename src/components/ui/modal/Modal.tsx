@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { designSystem } from '../../../design-system';
 import { Button } from '../button';
 // @ts-ignore - CSS module types are declared in global.d.ts
@@ -127,7 +128,7 @@ export const Modal: React.FC<ModalProps> = ({
   const cssVariables = useMemo(() => {
     return {
       '--modal-bg': theme.surface.default, // White background
-      '--modal-backdrop': 'rgba(0, 0, 0, 0.5)', // Semi-transparent black backdrop
+      '--modal-backdrop': 'rgba(23, 23, 23, 0.4)', // Semi-transparent dark backdrop matching Figma
       '--modal-border': theme.border.default, // #E5E5E5
       '--modal-text': theme.text.primary, // Black
       '--modal-font-family': typography.fontFamily.primary,
@@ -222,7 +223,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   console.log("Modal rendering - isOpen is true");
 
-  return (
+  const modalContent = (
     <div
       className={styles.modalBackdrop}
       style={cssVariables}
@@ -280,5 +281,8 @@ export const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  // Render modal in a portal at document root to ensure it's on top
+  return createPortal(modalContent, document.body);
 };
 
