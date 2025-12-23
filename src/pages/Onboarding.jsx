@@ -27,14 +27,23 @@ export default function Onboarding() {
 
     if (user) {
       // Upsert user profile: update if exists, insert if not
-      await supabase.from("user_profiles").upsert({
+      const { error } = await supabase.from("user_profiles").upsert({
         user_id: user.id,
         selected_goal: selectedGoal,
         onboarding_completed: true,
         updated_at: new Date().toISOString(),
       });
+
+      if (error) {
+        console.error("Error saving onboarding data:", error);
+        // Still navigate even if save fails (user can complete onboarding again)
+      } else {
+        // Dispatch custom event to notify App.jsx to refresh onboarding status
+        window.dispatchEvent(new CustomEvent("onboardingCompleted"));
+      }
     }
 
+    // Navigate to dashboard - App.jsx will handle routing
     navigate("/dashboard");
   };
 

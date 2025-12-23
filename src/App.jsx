@@ -20,13 +20,15 @@ export default function App() {
 
       // Check if onboarding is completed
       if (session?.user) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("user_profiles")
           .select("onboarding_completed")
           .eq("user_id", session.user.id)
-          .single();
+          .maybeSingle();
 
-        setOnboardingCompleted(data?.onboarding_completed || false);
+        // If profile exists and onboarding is completed, set to true
+        // If no profile exists (new user) or onboarding not completed, set to false
+        setOnboardingCompleted(data?.onboarding_completed === true);
       }
 
       setLoading(false);
@@ -41,19 +43,42 @@ export default function App() {
 
       // Check onboarding status when auth state changes
       if (session?.user) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("user_profiles")
           .select("onboarding_completed")
           .eq("user_id", session.user.id)
-          .single();
+          .maybeSingle();
 
-        setOnboardingCompleted(data?.onboarding_completed || false);
+        // If profile exists and onboarding is completed, set to true
+        // If no profile exists (new user) or onboarding not completed, set to false
+        setOnboardingCompleted(data?.onboarding_completed === true);
       } else {
         setOnboardingCompleted(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Listen for onboarding completion event to refresh status
+    const checkOnboardingStatus = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("onboarding_completed")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        setOnboardingCompleted(data?.onboarding_completed === true);
+      }
+    };
+
+    window.addEventListener("onboardingCompleted", checkOnboardingStatus);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("onboardingCompleted", checkOnboardingStatus);
+    };
   }, []);
 
   if (loading) return null;

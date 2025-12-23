@@ -1,27 +1,13 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import styles from "./Login.module.css";
 
 export default function Login() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session) {
-          navigate("/onboarding", { replace: true });
-        }
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [navigate]);
+  // Remove navigation logic - let App.jsx handle routing based on onboarding status
 
   async function handleSubmit(e) {
     e.preventDefault();
