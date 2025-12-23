@@ -27,6 +27,10 @@ create table if not exists user_profiles (
   user_id uuid references auth.users(id) on delete cascade unique not null,
   selected_goal text,
   onboarding_completed boolean default false,
+  -- Profile fields
+  avatar_url text, -- URL to user's avatar image (Supabase Storage or external)
+  display_name text, -- Optional custom display name
+  full_name text, -- Optional full name
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()
 );
