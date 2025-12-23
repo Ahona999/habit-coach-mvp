@@ -126,7 +126,17 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error);
+      } else {
+        console.log("Signed out successfully");
+        // Navigation will be handled by App.jsx auth state change
+      }
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   const getGreeting = () => {

@@ -98,17 +98,23 @@ export default function App() {
 
     // Listen for onboarding completion event to refresh status
     const checkOnboardingStatus = async () => {
+      console.log("onboardingCompleted event received, checking status...");
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (session?.user) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("user_profiles")
           .select("onboarding_completed")
           .eq("user_id", session.user.id)
           .maybeSingle();
 
-        setOnboardingCompleted(data?.onboarding_completed === true);
+        if (error) {
+          console.error("Error checking onboarding status:", error);
+        } else {
+          console.log("Onboarding status:", data?.onboarding_completed);
+          setOnboardingCompleted(data?.onboarding_completed === true);
+        }
       }
     };
 

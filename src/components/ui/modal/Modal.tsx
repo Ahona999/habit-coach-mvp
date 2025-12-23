@@ -220,6 +220,8 @@ export const Modal: React.FC<ModalProps> = ({
     return null;
   }
 
+  console.log("Modal rendering - isOpen is true");
+
   return (
     <div
       className={styles.modalBackdrop}
