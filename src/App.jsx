@@ -12,12 +12,18 @@ export default function App() {
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const initializeAuth = async () => {
       try {
+        console.log("Initializing auth...");
+        
         const {
           data: { session },
           error: sessionError,
         } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
         
         if (sessionError) {
           console.error("Error getting session:", sessionError);
@@ -25,33 +31,49 @@ export default function App() {
           return;
         }
         
+        console.log("Session retrieved:", session ? "User logged in" : "No session");
         setSession(session);
 
         // Check if onboarding is completed
         if (session?.user) {
-          const { data, error } = await supabase
-            .from("user_profiles")
-            .select("onboarding_completed")
-            .eq("user_id", session.user.id)
-            .maybeSingle();
+          try {
+            const { data, error } = await supabase
+              .from("user_profiles")
+              .select("onboarding_completed")
+              .eq("user_id", session.user.id)
+              .maybeSingle();
 
-          if (error) {
-            console.error("Error fetching user profile:", error);
+            if (error) {
+              console.error("Error fetching user profile:", error);
+            }
+
+            // If profile exists and onboarding is completed, set to true
+            // If no profile exists (new user) or onboarding not completed, set to false
+            if (isMounted) {
+              setOnboardingCompleted(data?.onboarding_completed === true);
+            }
+          } catch (profileError) {
+            console.error("Error checking onboarding status:", profileError);
           }
-
-          // If profile exists and onboarding is completed, set to true
-          // If no profile exists (new user) or onboarding not completed, set to false
-          setOnboardingCompleted(data?.onboarding_completed === true);
         }
 
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+          console.log("Auth initialization complete");
+        }
       } catch (error) {
         console.error("Error initializing auth:", error);
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     initializeAuth();
+    
+    return () => {
+      isMounted = false;
+    };
 
     const {
       data: { subscription },
