@@ -11,113 +11,101 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
+  // Check onboarding status for a user
+  const checkOnboardingStatus = async (userId) => {
+    if (!userId) return false;
+    
+    try {
+      const { data } = await supabase
+        .from("user_profiles")
+        .select("onboarding_completed")
+        .eq("user_id", userId)
+        .maybeSingle();
+      
+      return data?.onboarding_completed === true;
+    } catch (error) {
+      console.error("Error checking onboarding:", error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
 
-    // Initialize auth - get current session
-    const initializeAuth = async () => {
-      console.log("Starting auth initialization...");
+    // Get initial session
+    const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        console.log("Got session:", session ? "yes" : "no", error ? `Error: ${error.message}` : "");
-
+        const { data: { session } } = await supabase.auth.getSession();
+        
         if (!isMounted) return;
-
-        if (error) {
-          console.error("Error getting session:", error);
-          setLoading(false);
-          return;
-        }
-
+        
         setSession(session);
-
+        
         if (session?.user) {
-          console.log("Fetching user profile for:", session.user.id);
-          const { data, error: profileError } = await supabase
-            .from("user_profiles")
-            .select("onboarding_completed")
-            .eq("user_id", session.user.id)
-            .maybeSingle();
-
-          console.log("Profile data:", data, profileError ? `Error: ${profileError.message}` : "");
-
+          const completed = await checkOnboardingStatus(session.user.id);
           if (isMounted) {
-            setOnboardingCompleted(data?.onboarding_completed === true);
+            setOnboardingCompleted(completed);
           }
         }
-
-        if (isMounted) {
-          console.log("Auth initialization complete, setting loading to false");
-          setLoading(false);
-        }
       } catch (error) {
-        console.error("Error initializing auth:", error);
+        console.error("Error getting session:", error);
+      } finally {
         if (isMounted) {
           setLoading(false);
         }
       }
     };
 
-    initializeAuth();
+    getInitialSession();
 
-    // Fallback timeout - if loading takes more than 5 seconds, force stop loading
-    const timeout = setTimeout(() => {
-      if (isMounted && loading) {
-        console.warn("Auth initialization timed out, forcing loading to false");
-        setLoading(false);
-      }
-    }, 5000);
-
-    // Subscribe to auth state changes
+    // Listen for auth changes (login, logout, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log("Auth event:", event);
+        
         if (!isMounted) return;
         
         setSession(session);
-
+        
         if (session?.user) {
-          const { data } = await supabase
-            .from("user_profiles")
-            .select("onboarding_completed")
-            .eq("user_id", session.user.id)
-            .maybeSingle();
-
+          const completed = await checkOnboardingStatus(session.user.id);
           if (isMounted) {
-            setOnboardingCompleted(data?.onboarding_completed === true);
+            setOnboardingCompleted(completed);
           }
         } else {
           setOnboardingCompleted(false);
         }
+        
+        // Always ensure loading is false after auth state change
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     );
 
-    // Listen for onboarding completion event
+    // Listen for manual onboarding completion
     const handleOnboardingComplete = async () => {
+      if (!isMounted) return;
+      
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user && isMounted) {
-        const { data } = await supabase
-          .from("user_profiles")
-          .select("onboarding_completed")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-
+      if (session?.user) {
+        const completed = await checkOnboardingStatus(session.user.id);
         if (isMounted) {
-          setOnboardingCompleted(data?.onboarding_completed === true);
+          setOnboardingCompleted(completed);
         }
       }
     };
 
     window.addEventListener("onboardingCompleted", handleOnboardingComplete);
 
-    // Cleanup
     return () => {
       isMounted = false;
-      clearTimeout(timeout);
       subscription.unsubscribe();
       window.removeEventListener("onboardingCompleted", handleOnboardingComplete);
     };
   }, []);
 
+  // Show loading screen
   if (loading) {
     return (
       <div style={{ 
@@ -133,40 +121,37 @@ export default function App() {
     );
   }
 
-  // Determine redirect path for authenticated users
-  const getAuthRedirect = () => {
-    if (!session) return "/";
-    if (!onboardingCompleted) return "/onboarding";
-    return "/dashboard";
-  };
-
   return (
     <Routes>
-      {/* Auth */}
+      {/* Home - Login page */}
       <Route
         path="/"
-        element={
-          session ? (
-            <Navigate to={getAuthRedirect()} replace />
-          ) : (
-            <Auth />
-          )
-        }
-      />
-      <Route path="/login" element={<Login />} />
-
-      {/* Onboarding (protected, only if not completed) */}
-      <Route
-        path="/onboarding"
         element={
           session ? (
             onboardingCompleted ? (
               <Navigate to="/dashboard" replace />
             ) : (
-              <Onboarding />
+              <Navigate to="/onboarding" replace />
             )
           ) : (
+            <Auth />
+          )
+        }
+      />
+      
+      {/* Login alias */}
+      <Route path="/login" element={<Login />} />
+
+      {/* Onboarding */}
+      <Route
+        path="/onboarding"
+        element={
+          !session ? (
             <Navigate to="/" replace />
+          ) : onboardingCompleted ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Onboarding />
           )
         }
       />
@@ -175,14 +160,12 @@ export default function App() {
       <Route
         path="/dashboard"
         element={
-          session ? (
-            onboardingCompleted ? (
-              <Dashboard />
-            ) : (
-              <Navigate to="/onboarding" replace />
-            )
-          ) : (
+          !session ? (
             <Navigate to="/" replace />
+          ) : !onboardingCompleted ? (
+            <Navigate to="/onboarding" replace />
+          ) : (
+            <Dashboard />
           )
         }
       />
@@ -192,4 +175,3 @@ export default function App() {
     </Routes>
   );
 }
-

@@ -47,21 +47,21 @@ export default function Onboarding() {
 
       if (error) {
         console.error("Error saving onboarding data:", error);
-        // Still navigate even if save fails (user can complete onboarding again)
       } else {
         console.log("Onboarding completed successfully");
-        // Dispatch custom event to notify App.jsx to refresh onboarding status
-        window.dispatchEvent(new CustomEvent("onboardingCompleted"));
-        // Small delay to ensure event is processed
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 100);
-        return;
       }
+      
+      // Dispatch event to refresh App.jsx state
+      window.dispatchEvent(new CustomEvent("onboardingCompleted"));
+      
+      // Wait a moment for state to update, then navigate
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 200);
+    } else {
+      // No user - redirect to login
+      navigate("/", { replace: true });
     }
-
-    // Navigate to dashboard - App.jsx will handle routing
-    navigate("/dashboard");
   };
 
   if (step === 1) {
