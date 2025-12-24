@@ -13,9 +13,6 @@ export default function Dashboard({ darkMode, setDarkMode }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [openMenu, setOpenMenu] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isNarrow, setIsNarrow] = useState(window.innerWidth < 1100);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Theme colors - darker black theme
   const theme = darkMode ? {
@@ -93,31 +90,6 @@ export default function Dashboard({ darkMode, setDarkMode }) {
   useEffect(() => {
     fetchData();
   }, []);
-
-  // Handle window resize for responsive design
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      const narrow = window.innerWidth < 1100;
-      setIsMobile(mobile);
-      setIsNarrow(narrow);
-      if (mobile) {
-        setSidebarCollapsed(true);
-        setMobileMenuOpen(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Close mobile menu when clicking outside
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      const handleClick = () => setMobileMenuOpen(false);
-      document.addEventListener('click', handleClick);
-      return () => document.removeEventListener('click', handleClick);
-    }
-  }, [mobileMenuOpen]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -358,61 +330,35 @@ export default function Dashboard({ darkMode, setDarkMode }) {
 
   return (
     <div style={{ ...styles.container, backgroundColor: theme.bg }}>
-      {/* Mobile Menu Overlay */}
-      {isMobile && mobileMenuOpen && (
-        <div 
-          style={styles.mobileOverlay}
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
       {/* Sidebar */}
       <aside style={{
         ...styles.sidebar,
-        width: isMobile ? "240px" : (sidebarCollapsed ? "64px" : "220px"),
+        width: sidebarCollapsed ? "64px" : "220px",
         backgroundColor: theme.sidebarBg,
         borderColor: theme.border,
-        ...(isMobile && {
-          position: "fixed",
-          left: mobileMenuOpen ? "0" : "-240px",
-          top: 0,
-          bottom: 0,
-          zIndex: 1000,
-          transition: "left 0.3s ease",
-        }),
       }}>
         <div style={{ 
           ...styles.sidebarHeader, 
           borderColor: theme.border,
-          justifyContent: sidebarCollapsed && !isMobile ? "center" : "space-between",
-          padding: sidebarCollapsed && !isMobile ? "20px 12px" : "20px 16px",
+          justifyContent: sidebarCollapsed ? "center" : "space-between",
+          padding: sidebarCollapsed ? "20px 12px" : "20px 16px",
         }}>
-          {(!sidebarCollapsed || isMobile) && (
+          {!sidebarCollapsed && (
             <h1 style={{ ...styles.logo, color: theme.text }}>Bloom</h1>
           )}
-          {!isMobile && (
-            <button 
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              style={{ 
-                ...styles.collapseBtn, 
-                color: theme.textSecondary,
-                padding: "6px 10px",
-                borderRadius: "6px",
-                backgroundColor: darkMode ? "#262626" : "#f5f5f5",
-              }}
-              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {sidebarCollapsed ? "›" : "‹"}
-            </button>
-          )}
-          {isMobile && (
-            <button 
-              onClick={() => setMobileMenuOpen(false)}
-              style={{ ...styles.collapseBtn, color: theme.textSecondary }}
-            >
-              ✕
-            </button>
-          )}
+          <button 
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            style={{ 
+              ...styles.collapseBtn, 
+              color: theme.textSecondary,
+              padding: "6px 10px",
+              borderRadius: "6px",
+              backgroundColor: darkMode ? "#262626" : "#f5f5f5",
+            }}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? "›" : "‹"}
+          </button>
         </div>
         
         <nav style={styles.nav}>
@@ -420,26 +366,26 @@ export default function Dashboard({ darkMode, setDarkMode }) {
             style={{ 
               ...styles.navItemActive, 
               backgroundColor: darkMode ? "#312e81" : "#eff6ff",
-              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
-              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+              justifyContent: sidebarCollapsed ? "center" : "flex-start",
+              padding: sidebarCollapsed ? "12px" : "12px 16px",
             }}
             title="Dashboard"
           >
             <span style={styles.navIcon}>📊</span>
-            {(!sidebarCollapsed || isMobile) && <span>Dashboard</span>}
+            {!sidebarCollapsed && <span>Dashboard</span>}
           </button>
           <button 
             onClick={() => navigate("/settings")}
             style={{ 
               ...styles.navItem, 
               color: theme.textSecondary,
-              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
-              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+              justifyContent: sidebarCollapsed ? "center" : "flex-start",
+              padding: sidebarCollapsed ? "12px" : "12px 16px",
             }}
             title="Settings"
           >
             <span style={styles.navIcon}>⚙️</span>
-            {(!sidebarCollapsed || isMobile) && <span>Settings</span>}
+            {!sidebarCollapsed && <span>Settings</span>}
           </button>
         </nav>
 
@@ -449,13 +395,13 @@ export default function Dashboard({ darkMode, setDarkMode }) {
             style={{ 
               ...styles.logoutBtn, 
               color: theme.textSecondary,
-              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
-              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+              justifyContent: sidebarCollapsed ? "center" : "flex-start",
+              padding: sidebarCollapsed ? "12px" : "12px 16px",
             }}
             title="Logout"
           >
             <span style={styles.navIcon}>🚪</span>
-            {(!sidebarCollapsed || isMobile) && <span>Logout</span>}
+            {!sidebarCollapsed && <span>Logout</span>}
           </button>
         </div>
       </aside>
@@ -463,46 +409,17 @@ export default function Dashboard({ darkMode, setDarkMode }) {
       {/* Main Content */}
       <main style={{
         ...styles.main,
-        marginLeft: isMobile ? 0 : (sidebarCollapsed ? "64px" : "220px"),
-        padding: isMobile ? "16px" : "24px 32px",
+        marginLeft: sidebarCollapsed ? "64px" : "220px",
       }}>
         {/* Header */}
-        <header style={{
-          ...styles.header,
-          flexDirection: isMobile ? "column" : "row",
-          alignItems: isMobile ? "flex-start" : "center",
-          gap: isMobile ? "16px" : "0",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
-            {isMobile && (
-              <button 
-                onClick={(e) => { e.stopPropagation(); setMobileMenuOpen(true); }}
-                style={{ ...styles.hamburgerBtn, color: theme.text }}
-              >
-                ☰
-              </button>
-            )}
-            <div style={{ flex: 1 }}>
-              <h1 style={{ 
-                ...styles.greeting, 
-                color: theme.text,
-                fontSize: isMobile ? "22px" : "28px",
-              }}>{getGreeting()}, {userName}</h1>
-              <p style={{ ...styles.subtitle, color: theme.textSecondary }}>Track your progress and build better habits.</p>
-            </div>
+        <header style={styles.header}>
+          <div>
+            <h1 style={{ ...styles.greeting, color: theme.text }}>{getGreeting()}, {userName}</h1>
+            <p style={{ ...styles.subtitle, color: theme.textSecondary }}>Track your progress and build better habits.</p>
           </div>
           <button 
             onClick={() => setShowAddForm(true)} 
-            style={{ 
-              ...styles.addBtn, 
-              backgroundColor: theme.primary,
-              width: isMobile ? "100%" : "auto",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              whiteSpace: "nowrap",
-            }}
+            style={{ ...styles.addBtn, backgroundColor: theme.primary }}
           >
             <span>Add Habit</span>
             <span style={{ fontSize: "18px", fontWeight: "400" }}>+</span>
@@ -510,11 +427,7 @@ export default function Dashboard({ darkMode, setDarkMode }) {
         </header>
 
         {/* Content Grid */}
-        <div style={{
-          ...styles.contentGrid,
-          gridTemplateColumns: isNarrow ? "1fr" : "1fr 340px",
-          gap: isNarrow ? "16px" : "24px",
-        }}>
+        <div style={styles.contentGrid}>
           {/* Left Column - Habits */}
           <div style={styles.leftColumn}>
             {/* Add/Edit Form */}
@@ -534,7 +447,7 @@ export default function Dashboard({ darkMode, setDarkMode }) {
                     onChange={(e) => setHabitName(e.target.value)}
                     style={{ ...styles.input, backgroundColor: theme.inputBg, borderColor: theme.border, color: theme.text }}
                   />
-                  <div style={{ ...styles.formRow, flexDirection: isMobile ? "column" : "row" }}>
+                  <div style={styles.formRow}>
                     <select value={frequency} onChange={(e) => setFrequency(e.target.value)} style={{ ...styles.select, backgroundColor: theme.inputBg, borderColor: theme.border, color: theme.text }}>
                       <option value="Daily">Daily</option>
                       <option value="Weekly">Weekly</option>
@@ -589,31 +502,20 @@ export default function Dashboard({ darkMode, setDarkMode }) {
                   
                   return (
                     <div key={habit.id} style={{ ...styles.habitCard, backgroundColor: theme.cardBg, borderColor: theme.border }}>
-                      <div style={{
-                        ...styles.habitTop,
-                        flexDirection: isMobile ? "column" : "row",
-                        alignItems: isMobile ? "flex-start" : "center",
-                        gap: isMobile ? "12px" : "0",
-                      }}>
+                      <div style={styles.habitTop}>
                         <div style={styles.habitLeft}>
                           <div style={{
                             ...styles.habitCheck,
                             backgroundColor: habit.color || "#4f46e5",
-                            width: isMobile ? "36px" : "40px",
-                            height: isMobile ? "36px" : "40px",
                           }}>
                             ✓
                           </div>
                           <div>
-                            <h3 style={{ ...styles.habitName, color: theme.text, fontSize: isMobile ? "15px" : "16px" }}>{habit.title}</h3>
+                            <h3 style={{ ...styles.habitName, color: theme.text }}>{habit.title}</h3>
                             <p style={{ ...styles.habitFreq, color: theme.textSecondary }}>{habit.frequency || "Daily"}</p>
                           </div>
                         </div>
-                        <div style={{
-                          ...styles.habitRight,
-                          width: isMobile ? "100%" : "auto",
-                          justifyContent: isMobile ? "space-between" : "flex-end",
-                        }}>
+                        <div style={styles.habitRight}>
                           <span style={styles.streak}>🔥 {stats.streak}d</span>
                           <span style={{ ...styles.percentage, color: theme.textSecondary }}>{stats.percentage}%</span>
                           <div style={styles.menuContainer}>
@@ -643,24 +545,18 @@ export default function Dashboard({ darkMode, setDarkMode }) {
                         </div>
                       </div>
                       
-                      {/* Completion Dots */}
-                      <div style={{
-                        ...styles.dotsContainer,
-                        gap: isMobile ? "4px" : "6px",
-                      }}>
+                      {/* Completion Dots - Centered */}
+                      <div style={styles.dotsContainer}>
                         {dots.map((dot, idx) => (
                           <div
                             key={idx}
                             onClick={() => toggleCheckin(habit.id, dot.date)}
                             style={{
                               ...styles.dot,
-                              width: isMobile ? "14px" : "18px",
-                              height: isMobile ? "14px" : "18px",
                               backgroundColor: dot.isCompleted 
                                 ? (habit.color || "#4f46e5") 
                                 : (darkMode ? "#374151" : "#e5e5e5"),
                               border: dot.isToday ? `2px solid ${theme.text}` : "none",
-                              boxSizing: "border-box",
                             }}
                             title={`${dot.monthName} ${dot.dayNum}: ${dot.isCompleted ? "Completed ✓" : "Not completed"}`}
                           />
@@ -764,22 +660,6 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-  },
-  // Mobile Overlay
-  mobileOverlay: {
-    position: "fixed",
-    inset: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    zIndex: 999,
-  },
-  // Hamburger Button
-  hamburgerBtn: {
-    background: "none",
-    border: "none",
-    fontSize: "24px",
-    cursor: "pointer",
-    padding: "4px 8px",
-    flexShrink: 0,
   },
   // Sidebar
   sidebar: {
@@ -920,8 +800,8 @@ const styles = {
   // Content Grid
   contentGrid: {
     display: "grid",
-    gridTemplateColumns: "1fr 320px",
-    gap: "24px",
+    gridTemplateColumns: "1fr 300px",
+    gap: "28px",
   },
   leftColumn: {
     display: "flex",
@@ -1133,19 +1013,22 @@ const styles = {
   },
   dotsContainer: {
     display: "flex",
-    flexWrap: "wrap",
-    gap: "6px",
+    flexWrap: "nowrap",
+    gap: "4px",
     justifyContent: "center",
     alignItems: "center",
-    padding: "8px 0",
+    padding: "12px 0 4px",
+    overflowX: "auto",
   },
   dot: {
-    width: "18px",
-    height: "18px",
+    width: "16px",
+    height: "16px",
+    minWidth: "16px",
     borderRadius: "50%",
     cursor: "pointer",
     transition: "transform 0.1s, background-color 0.15s",
     flexShrink: 0,
+    boxSizing: "border-box",
   },
   // Calendar
   calendarCard: {

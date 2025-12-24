@@ -7,8 +7,6 @@ export default function Settings({ darkMode, setDarkMode }) {
   const [userName, setUserName] = useState("");
   const [userPlan] = useState("Free Plan");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Settings state
   const [dailyReminders, setDailyReminders] = useState(false);
@@ -22,29 +20,6 @@ export default function Settings({ darkMode, setDarkMode }) {
     setWeeklySummary(localStorage.getItem("weeklySummary") !== "false");
     setAiInsights(localStorage.getItem("aiInsights") !== "false");
   }, []);
-
-  // Handle window resize for responsive design
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (mobile) {
-        setSidebarCollapsed(true);
-        setMobileMenuOpen(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Close mobile menu when clicking outside
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      const handleClick = () => setMobileMenuOpen(false);
-      document.addEventListener('click', handleClick);
-      return () => document.removeEventListener('click', handleClick);
-    }
-  }, [mobileMenuOpen]);
 
   const fetchUserData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -114,61 +89,35 @@ export default function Settings({ darkMode, setDarkMode }) {
 
   return (
     <div style={{ ...styles.container, backgroundColor: theme.bg }}>
-      {/* Mobile Menu Overlay */}
-      {isMobile && mobileMenuOpen && (
-        <div 
-          style={styles.mobileOverlay}
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
       {/* Sidebar */}
       <aside style={{
         ...styles.sidebar,
-        width: isMobile ? "240px" : (sidebarCollapsed ? "64px" : "220px"),
+        width: sidebarCollapsed ? "64px" : "220px",
         backgroundColor: theme.sidebarBg,
         borderColor: theme.border,
-        ...(isMobile && {
-          position: "fixed",
-          left: mobileMenuOpen ? "0" : "-240px",
-          top: 0,
-          bottom: 0,
-          zIndex: 1000,
-          transition: "left 0.3s ease",
-        }),
       }}>
         <div style={{ 
           ...styles.sidebarHeader, 
           borderColor: theme.border,
-          justifyContent: sidebarCollapsed && !isMobile ? "center" : "space-between",
-          padding: sidebarCollapsed && !isMobile ? "20px 12px" : "20px 16px",
+          justifyContent: sidebarCollapsed ? "center" : "space-between",
+          padding: sidebarCollapsed ? "20px 12px" : "20px 16px",
         }}>
-          {(!sidebarCollapsed || isMobile) && (
+          {!sidebarCollapsed && (
             <h1 style={{ ...styles.logo, color: theme.text }}>Bloom</h1>
           )}
-          {!isMobile && (
-            <button 
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              style={{ 
-                ...styles.collapseBtn, 
-                color: theme.textSecondary,
-                padding: "6px 10px",
-                borderRadius: "6px",
-                backgroundColor: darkMode ? "#262626" : "#f5f5f5",
-              }}
-              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {sidebarCollapsed ? "›" : "‹"}
-            </button>
-          )}
-          {isMobile && (
-            <button 
-              onClick={() => setMobileMenuOpen(false)}
-              style={{ ...styles.collapseBtn, color: theme.textSecondary }}
-            >
-              ✕
-            </button>
-          )}
+          <button 
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            style={{ 
+              ...styles.collapseBtn, 
+              color: theme.textSecondary,
+              padding: "6px 10px",
+              borderRadius: "6px",
+              backgroundColor: darkMode ? "#262626" : "#f5f5f5",
+            }}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? "›" : "‹"}
+          </button>
         </div>
         
         <nav style={styles.nav}>
@@ -177,31 +126,31 @@ export default function Settings({ darkMode, setDarkMode }) {
             style={{ 
               ...styles.navItem, 
               color: theme.textSecondary,
-              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
-              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+              justifyContent: sidebarCollapsed ? "center" : "flex-start",
+              padding: sidebarCollapsed ? "12px" : "12px 16px",
             }}
             title="Dashboard"
           >
             <span style={styles.navIcon}>📊</span>
-            {(!sidebarCollapsed || isMobile) && <span>Dashboard</span>}
+            {!sidebarCollapsed && <span>Dashboard</span>}
           </button>
           <button 
             style={{ 
               ...styles.navItemActive, 
               backgroundColor: darkMode ? "#312e81" : "#eff6ff",
-              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
-              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+              justifyContent: sidebarCollapsed ? "center" : "flex-start",
+              padding: sidebarCollapsed ? "12px" : "12px 16px",
             }}
             title="Settings"
           >
             <span style={styles.navIcon}>⚙️</span>
-            {(!sidebarCollapsed || isMobile) && <span>Settings</span>}
+            {!sidebarCollapsed && <span>Settings</span>}
           </button>
         </nav>
 
         {/* User Profile at bottom */}
         <div style={{ ...styles.sidebarFooter, borderColor: theme.border }}>
-          {(!sidebarCollapsed || isMobile) ? (
+          {!sidebarCollapsed ? (
             <div style={styles.userProfile}>
               <div style={styles.avatar}>
                 {userName.charAt(0).toUpperCase()}
@@ -222,36 +171,23 @@ export default function Settings({ darkMode, setDarkMode }) {
       {/* Main Content */}
       <main style={{
         ...styles.main,
-        marginLeft: isMobile ? 0 : (sidebarCollapsed ? "64px" : "220px"),
-        padding: isMobile ? "24px 16px" : "48px",
+        marginLeft: sidebarCollapsed ? "64px" : "220px",
       }}>
-        <div style={{ ...styles.mainInner, padding: isMobile ? "0" : undefined }}>
-          {/* Mobile Header */}
-          {isMobile && (
-            <div style={styles.mobileHeader}>
-              <button 
-                onClick={(e) => { e.stopPropagation(); setMobileMenuOpen(true); }}
-                style={{ ...styles.hamburgerBtn, color: theme.text }}
-              >
-                ☰
-              </button>
-              <h1 style={{ ...styles.pageTitle, color: theme.text, margin: 0, flex: 1 }}>Settings</h1>
-            </div>
-          )}
-          {!isMobile && <h1 style={{ ...styles.pageTitle, color: theme.text }}>Settings</h1>}
+        <div style={styles.mainInner}>
+          <h1 style={{ ...styles.pageTitle, color: theme.text }}>Settings</h1>
 
           {/* Appearance Section */}
-          <div style={{ ...styles.card, backgroundColor: theme.cardBg, borderColor: theme.border, padding: isMobile ? "16px" : "24px" }}>
+          <div style={{ ...styles.card, backgroundColor: theme.cardBg, borderColor: theme.border }}>
             <h2 style={{ ...styles.sectionTitle, color: theme.text }}>Appearance</h2>
             
-            <div style={{ ...styles.settingRow, gap: isMobile ? "12px" : "16px" }}>
-              <div style={{ ...styles.settingLeft, gap: isMobile ? "12px" : "16px" }}>
-                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff", width: isMobile ? "38px" : "44px", height: isMobile ? "38px" : "44px", fontSize: isMobile ? "18px" : "20px" }}>
+            <div style={styles.settingRow}>
+              <div style={styles.settingLeft}>
+                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff" }}>
                   {darkMode ? "🌙" : "☀️"}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ ...styles.settingLabel, color: theme.text, fontSize: isMobile ? "14px" : "15px" }}>Dark mode</p>
-                  <p style={{ ...styles.settingDesc, color: theme.textSecondary, fontSize: isMobile ? "12px" : "13px" }}>
+                <div>
+                  <p style={{ ...styles.settingLabel, color: theme.text }}>Dark mode</p>
+                  <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
                     Switch between light and dark themes
                   </p>
                 </div>
@@ -261,17 +197,17 @@ export default function Settings({ darkMode, setDarkMode }) {
           </div>
 
           {/* Notifications Section */}
-          <div style={{ ...styles.card, backgroundColor: theme.cardBg, borderColor: theme.border, padding: isMobile ? "16px" : "24px" }}>
+          <div style={{ ...styles.card, backgroundColor: theme.cardBg, borderColor: theme.border }}>
             <h2 style={{ ...styles.sectionTitle, color: theme.text }}>Notifications</h2>
             
-            <div style={{ ...styles.settingRow, gap: isMobile ? "12px" : "16px" }}>
-              <div style={{ ...styles.settingLeft, gap: isMobile ? "12px" : "16px" }}>
-                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff", width: isMobile ? "38px" : "44px", height: isMobile ? "38px" : "44px", fontSize: isMobile ? "18px" : "20px" }}>
+            <div style={styles.settingRow}>
+              <div style={styles.settingLeft}>
+                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff" }}>
                   🔔
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ ...styles.settingLabel, color: theme.text, fontSize: isMobile ? "14px" : "15px" }}>Daily reminders</p>
-                  <p style={{ ...styles.settingDesc, color: theme.textSecondary, fontSize: isMobile ? "12px" : "13px" }}>
+                <div>
+                  <p style={{ ...styles.settingLabel, color: theme.text }}>Daily reminders</p>
+                  <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
                     Get notified to complete your habits
                   </p>
                 </div>
@@ -284,14 +220,14 @@ export default function Settings({ darkMode, setDarkMode }) {
 
             <div style={{ ...styles.divider, backgroundColor: theme.border }} />
 
-            <div style={{ ...styles.settingRow, gap: isMobile ? "12px" : "16px" }}>
-              <div style={{ ...styles.settingLeft, gap: isMobile ? "12px" : "16px" }}>
-                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff", width: isMobile ? "38px" : "44px", height: isMobile ? "38px" : "44px", fontSize: isMobile ? "18px" : "20px" }}>
+            <div style={styles.settingRow}>
+              <div style={styles.settingLeft}>
+                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff" }}>
                   ✉️
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ ...styles.settingLabel, color: theme.text, fontSize: isMobile ? "14px" : "15px" }}>Weekly summary</p>
-                  <p style={{ ...styles.settingDesc, color: theme.textSecondary, fontSize: isMobile ? "12px" : "13px" }}>
+                <div>
+                  <p style={{ ...styles.settingLabel, color: theme.text }}>Weekly summary</p>
+                  <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
                     Receive a weekly progress report
                   </p>
                 </div>
@@ -304,14 +240,14 @@ export default function Settings({ darkMode, setDarkMode }) {
 
             <div style={{ ...styles.divider, backgroundColor: theme.border }} />
 
-            <div style={{ ...styles.settingRow, gap: isMobile ? "12px" : "16px" }}>
-              <div style={{ ...styles.settingLeft, gap: isMobile ? "12px" : "16px" }}>
-                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff", width: isMobile ? "38px" : "44px", height: isMobile ? "38px" : "44px", fontSize: isMobile ? "18px" : "20px" }}>
+            <div style={styles.settingRow}>
+              <div style={styles.settingLeft}>
+                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff" }}>
                   ✨
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ ...styles.settingLabel, color: theme.text, fontSize: isMobile ? "14px" : "15px" }}>AI insights enabled</p>
-                  <p style={{ ...styles.settingDesc, color: theme.textSecondary, fontSize: isMobile ? "12px" : "13px" }}>
+                <div>
+                  <p style={{ ...styles.settingLabel, color: theme.text }}>AI insights enabled</p>
+                  <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
                     Allow AI to analyze your patterns
                   </p>
                 </div>
@@ -380,30 +316,6 @@ const styles = {
     display: "flex",
     minHeight: "100vh",
     fontFamily: "system-ui, -apple-system, sans-serif",
-    position: "relative",
-  },
-  // Mobile Overlay
-  mobileOverlay: {
-    position: "fixed",
-    inset: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    zIndex: 999,
-  },
-  // Hamburger Button
-  hamburgerBtn: {
-    background: "none",
-    border: "none",
-    fontSize: "24px",
-    cursor: "pointer",
-    padding: "4px 8px",
-    flexShrink: 0,
-  },
-  // Mobile Header
-  mobileHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    marginBottom: "24px",
   },
   // Sidebar
   sidebar: {
