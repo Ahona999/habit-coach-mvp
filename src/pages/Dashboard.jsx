@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [habits, setHabits] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -40,38 +43,38 @@ export default function Dashboard() {
         return;
       }
 
-      if (user) {
-        // Fetch user profile
-        const { data: profileData, error: profileError } = await supabase
-          .from("user_profiles")
-          .select("display_name, full_name")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (profileError) {
-          console.error("Error fetching profile:", profileError);
-        }
-
-        const name =
-          profileData?.display_name ||
-          profileData?.full_name ||
-          user.email?.split("@")[0] ||
-          "User";
-        setUserName(name);
-
-        // Fetch habits
-        const { data: habitsData, error: habitsError } = await supabase
-          .from("habits")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-
-        if (habitsError) {
-          console.error("Error fetching habits:", habitsError);
-        }
-
-        setHabits(habitsData || []);
+      if (!user) {
+        // No user, redirect to login
+        navigate("/", { replace: true });
+        return;
       }
+
+      // Fetch user profile
+      const { data: profileData } = await supabase
+        .from("user_profiles")
+        .select("display_name, full_name")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const name =
+        profileData?.display_name ||
+        profileData?.full_name ||
+        user.email?.split("@")[0] ||
+        "User";
+      setUserName(name);
+
+      // Fetch habits
+      const { data: habitsData, error: habitsError } = await supabase
+        .from("habits")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (habitsError) {
+        console.error("Error fetching habits:", habitsError);
+      }
+
+      setHabits(habitsData || []);
     } catch (err) {
       console.error("Dashboard error:", err);
       setError(err.message);
@@ -91,49 +94,71 @@ export default function Dashboard() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!habitName.trim()) return;
+    
+    if (!habitName.trim()) {
+      alert("Please enter a habit name");
+      return;
+    }
+
+    setSaving(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (user) {
-        if (editingHabit) {
-          const { error } = await supabase
-            .from("habits")
-            .update({
-              title: habitName.trim(),
-              frequency: frequency,
-              preferred_time: preferredTime,
-              color: selectedColor,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", editingHabit.id);
+      if (!user) {
+        alert("Session expired. Please login again.");
+        navigate("/", { replace: true });
+        return;
+      }
 
-          if (error) {
-            console.error("Error updating habit:", error);
-          } else {
-            await fetchData();
-            resetForm();
-          }
+      if (editingHabit) {
+        // Update existing habit
+        const { error } = await supabase
+          .from("habits")
+          .update({
+            title: habitName.trim(),
+            frequency: frequency,
+            preferred_time: preferredTime,
+            color: selectedColor,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", editingHabit.id);
+
+        if (error) {
+          console.error("Error updating habit:", error);
+          alert("Failed to update habit: " + error.message);
         } else {
-          const { error } = await supabase.from("habits").insert({
+          console.log("Habit updated successfully");
+          await fetchData();
+          resetForm();
+        }
+      } else {
+        // Create new habit
+        const { data, error } = await supabase
+          .from("habits")
+          .insert({
             user_id: user.id,
             title: habitName.trim(),
             frequency: frequency,
             preferred_time: preferredTime,
             color: selectedColor,
-          });
+          })
+          .select();
 
-          if (error) {
-            console.error("Error adding habit:", error);
-          } else {
-            await fetchData();
-            resetForm();
-          }
+        if (error) {
+          console.error("Error adding habit:", error);
+          alert("Failed to add habit: " + error.message);
+        } else {
+          console.log("Habit added successfully:", data);
+          await fetchData();
+          resetForm();
         }
       }
     } catch (err) {
       console.error("Submit error:", err);
+      alert("Error: " + err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -154,22 +179,25 @@ export default function Dashboard() {
 
       if (error) {
         console.error("Error deleting habit:", error);
+        alert("Failed to delete habit: " + error.message);
       } else {
         await fetchData();
       }
     } catch (err) {
       console.error("Delete error:", err);
+      alert("Error: " + err.message);
     }
   };
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Error signing out:", error);
-      }
+      await supabase.auth.signOut();
+      // Force redirect to login
+      window.location.href = "/";
     } catch (err) {
       console.error("Logout error:", err);
+      // Force redirect anyway
+      window.location.href = "/";
     }
   };
 
@@ -226,9 +254,19 @@ export default function Dashboard() {
         {/* Add/Edit Form */}
         {showAddForm && (
           <div style={styles.formCard}>
+            {/* Back Button */}
+            <button
+              onClick={resetForm}
+              style={styles.backButton}
+              type="button"
+            >
+              ← Back
+            </button>
+            
             <h2 style={styles.formTitle}>
               {editingHabit ? "Edit Habit" : "Add New Habit"}
             </h2>
+            
             <form onSubmit={handleSubmit} style={styles.form}>
               {/* Habit Name */}
               <div style={styles.formGroup}>
@@ -239,7 +277,6 @@ export default function Dashboard() {
                   value={habitName}
                   onChange={(e) => setHabitName(e.target.value)}
                   style={styles.input}
-                  required
                 />
               </div>
 
@@ -296,19 +333,20 @@ export default function Dashboard() {
               <div style={styles.formButtons}>
                 <button
                   type="submit"
-                  disabled={!habitName.trim()}
+                  disabled={saving || !habitName.trim()}
                   style={{
                     ...styles.primaryButton,
-                    opacity: habitName.trim() ? 1 : 0.5,
-                    cursor: habitName.trim() ? "pointer" : "not-allowed",
+                    opacity: (saving || !habitName.trim()) ? 0.6 : 1,
+                    cursor: (saving || !habitName.trim()) ? "not-allowed" : "pointer",
                   }}
                 >
-                  {editingHabit ? "Update Habit" : "Add Habit"}
+                  {saving ? "Saving..." : editingHabit ? "Update Habit" : "Add Habit"}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
                   style={styles.secondaryButton}
+                  disabled={saving}
                 >
                   Cancel
                 </button>
@@ -321,13 +359,13 @@ export default function Dashboard() {
         {habits.length > 0 && (
           <div style={styles.habitsSection}>
             <div style={styles.habitsHeader}>
-              <h2 style={styles.habitsTitle}>Your Habits</h2>
+              <h2 style={styles.habitsTitle}>Your Habits ({habits.length})</h2>
               {!showAddForm && (
                 <button
                   onClick={() => setShowAddForm(true)}
                   style={styles.primaryButton}
                 >
-                  Add Habit
+                  + Add Habit
                 </button>
               )}
             </div>
@@ -373,7 +411,7 @@ export default function Dashboard() {
   );
 }
 
-// Inline styles - simple and stable
+// Inline styles
 const styles = {
   page: {
     minHeight: "100vh",
@@ -459,12 +497,26 @@ const styles = {
     borderRadius: "12px",
     padding: "32px",
     marginBottom: "32px",
+    position: "relative",
+  },
+  backButton: {
+    position: "absolute",
+    top: "16px",
+    left: "16px",
+    padding: "8px 12px",
+    backgroundColor: "transparent",
+    border: "none",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#666",
+    cursor: "pointer",
   },
   formTitle: {
     fontSize: "24px",
     fontWeight: "700",
     color: "#171717",
-    margin: "0 0 24px 0",
+    margin: "16px 0 24px 0",
+    textAlign: "center",
   },
   form: {
     display: "flex",
