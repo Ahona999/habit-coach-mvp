@@ -68,15 +68,15 @@ export default function Settings({ darkMode, setDarkMode }) {
     window.location.href = "/";
   };
 
-  // Theme colors
+  // Theme colors - darker black theme
   const theme = darkMode ? {
-    bg: "#0f172a",
-    cardBg: "#1e293b",
-    border: "#334155",
-    text: "#f8fafc",
-    textSecondary: "#94a3b8",
+    bg: "#0a0a0a",
+    cardBg: "#171717",
+    border: "#262626",
+    text: "#fafafa",
+    textSecondary: "#a3a3a3",
     primary: "#6366f1",
-    sidebarBg: "#1e293b",
+    sidebarBg: "#141414",
   } : {
     bg: "#f8fafc",
     cardBg: "#ffffff",
@@ -138,95 +138,97 @@ export default function Settings({ darkMode, setDarkMode }) {
 
       {/* Main Content */}
       <main style={styles.main}>
-        <h1 style={{ ...styles.pageTitle, color: theme.text }}>Settings</h1>
+        <div style={styles.mainInner}>
+          <h1 style={{ ...styles.pageTitle, color: theme.text }}>Settings</h1>
 
-        {/* Appearance Section */}
-        <div style={{ ...styles.card, backgroundColor: theme.cardBg, borderColor: theme.border }}>
-          <h2 style={{ ...styles.sectionTitle, color: theme.text }}>Appearance</h2>
-          
-          <div style={styles.settingRow}>
-            <div style={styles.settingLeft}>
-              <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#312e81" : "#eff6ff" }}>
-                ☀️
+          {/* Appearance Section */}
+          <div style={{ ...styles.card, backgroundColor: theme.cardBg, borderColor: theme.border }}>
+            <h2 style={{ ...styles.sectionTitle, color: theme.text }}>Appearance</h2>
+            
+            <div style={styles.settingRow}>
+              <div style={styles.settingLeft}>
+                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff" }}>
+                  {darkMode ? "🌙" : "☀️"}
+                </div>
+                <div>
+                  <p style={{ ...styles.settingLabel, color: theme.text }}>Dark mode</p>
+                  <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
+                    Switch between light and dark themes
+                  </p>
+                </div>
               </div>
-              <div>
-                <p style={{ ...styles.settingLabel, color: theme.text }}>Dark mode</p>
-                <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
-                  Switch between light and dark themes
-                </p>
-              </div>
+              <Toggle checked={darkMode} onChange={handleDarkModeToggle} />
             </div>
-            <Toggle checked={darkMode} onChange={handleDarkModeToggle} />
           </div>
+
+          {/* Notifications Section */}
+          <div style={{ ...styles.card, backgroundColor: theme.cardBg, borderColor: theme.border }}>
+            <h2 style={{ ...styles.sectionTitle, color: theme.text }}>Notifications</h2>
+            
+            <div style={styles.settingRow}>
+              <div style={styles.settingLeft}>
+                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff" }}>
+                  🔔
+                </div>
+                <div>
+                  <p style={{ ...styles.settingLabel, color: theme.text }}>Daily reminders</p>
+                  <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
+                    Get notified to complete your habits
+                  </p>
+                </div>
+              </div>
+              <Toggle 
+                checked={dailyReminders} 
+                onChange={() => handleToggle("dailyReminders", !dailyReminders)} 
+              />
+            </div>
+
+            <div style={{ ...styles.divider, backgroundColor: theme.border }} />
+
+            <div style={styles.settingRow}>
+              <div style={styles.settingLeft}>
+                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff" }}>
+                  ✉️
+                </div>
+                <div>
+                  <p style={{ ...styles.settingLabel, color: theme.text }}>Weekly summary</p>
+                  <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
+                    Receive a weekly progress report
+                  </p>
+                </div>
+              </div>
+              <Toggle 
+                checked={weeklySummary} 
+                onChange={() => handleToggle("weeklySummary", !weeklySummary)} 
+              />
+            </div>
+
+            <div style={{ ...styles.divider, backgroundColor: theme.border }} />
+
+            <div style={styles.settingRow}>
+              <div style={styles.settingLeft}>
+                <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#262626" : "#eff6ff" }}>
+                  ✨
+                </div>
+                <div>
+                  <p style={{ ...styles.settingLabel, color: theme.text }}>AI insights enabled</p>
+                  <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
+                    Allow AI to analyze your patterns
+                  </p>
+                </div>
+              </div>
+              <Toggle 
+                checked={aiInsights} 
+                onChange={() => handleToggle("aiInsights", !aiInsights)} 
+              />
+            </div>
+          </div>
+
+          {/* Logout Button */}
+          <button onClick={handleLogout} style={{ ...styles.logoutBtn, borderColor: theme.border, color: theme.textSecondary }}>
+            Logout 🚪
+          </button>
         </div>
-
-        {/* Notifications Section */}
-        <div style={{ ...styles.card, backgroundColor: theme.cardBg, borderColor: theme.border }}>
-          <h2 style={{ ...styles.sectionTitle, color: theme.text }}>Notifications</h2>
-          
-          <div style={styles.settingRow}>
-            <div style={styles.settingLeft}>
-              <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#312e81" : "#eff6ff" }}>
-                🔔
-              </div>
-              <div>
-                <p style={{ ...styles.settingLabel, color: theme.text }}>Daily reminders</p>
-                <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
-                  Get notified to complete your habits
-                </p>
-              </div>
-            </div>
-            <Toggle 
-              checked={dailyReminders} 
-              onChange={() => handleToggle("dailyReminders", !dailyReminders)} 
-            />
-          </div>
-
-          <div style={{ ...styles.divider, backgroundColor: theme.border }} />
-
-          <div style={styles.settingRow}>
-            <div style={styles.settingLeft}>
-              <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#312e81" : "#eff6ff" }}>
-                ✉️
-              </div>
-              <div>
-                <p style={{ ...styles.settingLabel, color: theme.text }}>Weekly summary</p>
-                <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
-                  Receive a weekly progress report
-                </p>
-              </div>
-            </div>
-            <Toggle 
-              checked={weeklySummary} 
-              onChange={() => handleToggle("weeklySummary", !weeklySummary)} 
-            />
-          </div>
-
-          <div style={{ ...styles.divider, backgroundColor: theme.border }} />
-
-          <div style={styles.settingRow}>
-            <div style={styles.settingLeft}>
-              <div style={{ ...styles.iconBox, backgroundColor: darkMode ? "#312e81" : "#eff6ff" }}>
-                ✨
-              </div>
-              <div>
-                <p style={{ ...styles.settingLabel, color: theme.text }}>AI insights enabled</p>
-                <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
-                  Allow AI to analyze your patterns
-                </p>
-              </div>
-            </div>
-            <Toggle 
-              checked={aiInsights} 
-              onChange={() => handleToggle("aiInsights", !aiInsights)} 
-            />
-          </div>
-        </div>
-
-        {/* Logout Button */}
-        <button onClick={handleLogout} style={styles.logoutBtn}>
-          Logout 🚪
-        </button>
       </main>
     </div>
   );
@@ -371,8 +373,14 @@ const styles = {
   // Main
   main: {
     flex: 1,
-    padding: "32px 48px",
-    maxWidth: "800px",
+    padding: "48px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  mainInner: {
+    width: "100%",
+    maxWidth: "600px",
   },
   pageTitle: {
     fontSize: "28px",

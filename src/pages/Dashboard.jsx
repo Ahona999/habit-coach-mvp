@@ -14,16 +14,16 @@ export default function Dashboard({ darkMode, setDarkMode }) {
   const [openMenu, setOpenMenu] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Theme colors
+  // Theme colors - darker black theme
   const theme = darkMode ? {
-    bg: "#0f172a",
-    cardBg: "#1e293b",
-    border: "#334155",
-    text: "#f8fafc",
-    textSecondary: "#94a3b8",
+    bg: "#0a0a0a",
+    cardBg: "#171717",
+    border: "#262626",
+    text: "#fafafa",
+    textSecondary: "#a3a3a3",
     primary: "#6366f1",
-    sidebarBg: "#1e293b",
-    inputBg: "#334155",
+    sidebarBg: "#141414",
+    inputBg: "#262626",
   } : {
     bg: "#f8fafc",
     cardBg: "#ffffff",
@@ -173,22 +173,37 @@ export default function Dashboard({ darkMode, setDarkMode }) {
       if (!user) return;
 
       if (editingHabit) {
-        await supabase.from("habits").update({
+        // Update existing habit
+        const { error } = await supabase.from("habits").update({
           title: habitName.trim(),
           frequency,
           preferred_time: preferredTime,
           color: selectedColor,
         }).eq("id", editingHabit.id);
+        
+        if (!error) {
+          // Optimistic update - update local state immediately
+          setHabits(prev => prev.map(h => 
+            h.id === editingHabit.id 
+              ? { ...h, title: habitName.trim(), frequency, preferred_time: preferredTime, color: selectedColor }
+              : h
+          ));
+        }
       } else {
-        await supabase.from("habits").insert({
+        // Create new habit
+        const { data, error } = await supabase.from("habits").insert({
           user_id: user.id,
           title: habitName.trim(),
           frequency,
           preferred_time: preferredTime,
           color: selectedColor,
-        });
+        }).select().single();
+        
+        if (!error && data) {
+          // Optimistic update - add to local state immediately
+          setHabits(prev => [{ ...data, checkins: [] }, ...prev]);
+        }
       }
-      await fetchData();
       resetForm();
     } catch (err) {
       console.error("Error:", err);
@@ -210,13 +225,17 @@ export default function Dashboard({ darkMode, setDarkMode }) {
 
   const handleDelete = async () => {
     if (!deleteConfirm) return;
+    // Optimistic delete - remove from UI immediately
+    setHabits(prev => prev.filter(h => h.id !== deleteConfirm));
+    setDeleteConfirm(null);
+    
     try {
       await supabase.from("habits").delete().eq("id", deleteConfirm);
-      await fetchData();
     } catch (err) {
       console.error("Error:", err);
+      // Refetch if delete failed
+      fetchData();
     }
-    setDeleteConfirm(null);
   };
 
   const toggleCheckin = async (habitId, date) => {
@@ -545,11 +564,11 @@ export default function Dashboard({ darkMode, setDarkMode }) {
             {/* AI Insights */}
             <div style={{ ...styles.aiCard, backgroundColor: theme.cardBg, borderColor: theme.border }}>
               <h3 style={{ ...styles.aiTitle, color: theme.text }}>🤖 AI Insights</h3>
-              <div style={{ ...styles.aiInsight, backgroundColor: darkMode ? "#3b1c1c" : "#fef2f2" }}>
+              <div style={{ ...styles.aiInsight, backgroundColor: darkMode ? "#1c1917" : "#fef2f2" }}>
                 <span style={styles.aiIcon}>💡</span>
                 <div>
-                  <p style={{ ...styles.aiHeading, color: darkMode ? "#fca5a5" : "#b91c1c" }}>Remarkable effort!</p>
-                  <p style={{ ...styles.aiText, color: darkMode ? "#fca5a5" : "#b91c1c" }}>
+                  <p style={{ ...styles.aiHeading, color: darkMode ? "#fb923c" : "#b91c1c" }}>Remarkable effort!</p>
+                  <p style={{ ...styles.aiText, color: darkMode ? "#fdba74" : "#b91c1c" }}>
                     {habits.length > 0 
                       ? `You're tracking ${habits.length} habit${habits.length > 1 ? 's' : ''}. Keep up the great work!`
                       : "Add your first habit to start building better routines!"}
