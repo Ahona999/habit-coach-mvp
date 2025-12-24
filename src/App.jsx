@@ -13,53 +13,36 @@ export default function App() {
 
   useEffect(() => {
     let isMounted = true;
-    
+
+    // Initialize auth - get current session
     const initializeAuth = async () => {
       try {
-        console.log("Initializing auth...");
-        
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-        
+        const { data: { session }, error } = await supabase.auth.getSession();
+
         if (!isMounted) return;
-        
-        if (sessionError) {
-          console.error("Error getting session:", sessionError);
+
+        if (error) {
+          console.error("Error getting session:", error);
           setLoading(false);
           return;
         }
-        
-        console.log("Session retrieved:", session ? "User logged in" : "No session");
+
         setSession(session);
 
-        // Check if onboarding is completed
         if (session?.user) {
-          try {
-            const { data, error } = await supabase
-              .from("user_profiles")
-              .select("onboarding_completed")
-              .eq("user_id", session.user.id)
-              .maybeSingle();
+          const { data } = await supabase
+            .from("user_profiles")
+            .select("onboarding_completed")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
 
-            if (error) {
-              console.error("Error fetching user profile:", error);
-            }
-
-            // If profile exists and onboarding is completed, set to true
-            // If no profile exists (new user) or onboarding not completed, set to false
-            if (isMounted) {
-              setOnboardingCompleted(data?.onboarding_completed === true);
-            }
-          } catch (profileError) {
-            console.error("Error checking onboarding status:", profileError);
+          if (isMounted) {
+            setOnboardingCompleted(data?.onboarding_completed === true);
           }
         }
 
         if (isMounted) {
           setLoading(false);
-          console.log("Auth initialization complete");
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -70,59 +53,53 @@ export default function App() {
     };
 
     initializeAuth();
-    
-    return () => {
-      isMounted = false;
-    };
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (!isMounted) return;
+        
+        setSession(session);
 
-      // Check onboarding status when auth state changes
-      if (session?.user) {
-        const { data, error } = await supabase
-          .from("user_profiles")
-          .select("onboarding_completed")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
+        if (session?.user) {
+          const { data } = await supabase
+            .from("user_profiles")
+            .select("onboarding_completed")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
 
-        // If profile exists and onboarding is completed, set to true
-        // If no profile exists (new user) or onboarding not completed, set to false
-        setOnboardingCompleted(data?.onboarding_completed === true);
-      } else {
-        setOnboardingCompleted(false);
-      }
-    });
-
-    // Listen for onboarding completion event to refresh status
-    const checkOnboardingStatus = async () => {
-      console.log("onboardingCompleted event received, checking status...");
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data, error } = await supabase
-          .from("user_profiles")
-          .select("onboarding_completed")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error("Error checking onboarding status:", error);
+          if (isMounted) {
+            setOnboardingCompleted(data?.onboarding_completed === true);
+          }
         } else {
-          console.log("Onboarding status:", data?.onboarding_completed);
+          setOnboardingCompleted(false);
+        }
+      }
+    );
+
+    // Listen for onboarding completion event
+    const handleOnboardingComplete = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user && isMounted) {
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("onboarding_completed")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (isMounted) {
           setOnboardingCompleted(data?.onboarding_completed === true);
         }
       }
     };
 
-    window.addEventListener("onboardingCompleted", checkOnboardingStatus);
+    window.addEventListener("onboardingCompleted", handleOnboardingComplete);
 
+    // Cleanup
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
-      window.removeEventListener("onboardingCompleted", checkOnboardingStatus);
+      window.removeEventListener("onboardingCompleted", handleOnboardingComplete);
     };
   }, []);
 
