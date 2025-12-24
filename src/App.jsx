@@ -5,11 +5,15 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
+import Settings from "./pages/Settings";
 
 export default function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("darkMode") === "true";
+  });
 
   // Check onboarding status for a user
   const checkOnboardingStatus = async (userId) => {
@@ -58,11 +62,9 @@ export default function App() {
 
     getInitialSession();
 
-    // Listen for auth changes (login, logout, token refresh)
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth event:", event);
-        
         if (!isMounted) return;
         
         setSession(session);
@@ -76,7 +78,6 @@ export default function App() {
           setOnboardingCompleted(false);
         }
         
-        // Always ensure loading is false after auth state change
         if (isMounted) {
           setLoading(false);
         }
@@ -113,8 +114,9 @@ export default function App() {
         display: "flex", 
         alignItems: "center", 
         justifyContent: "center",
-        fontFamily: "Satoshi, sans-serif",
-        color: "#666"
+        fontFamily: "system-ui, sans-serif",
+        color: "#666",
+        backgroundColor: darkMode ? "#0f172a" : "#f8fafc",
       }}>
         <p>Loading...</p>
       </div>
@@ -165,7 +167,21 @@ export default function App() {
           ) : !onboardingCompleted ? (
             <Navigate to="/onboarding" replace />
           ) : (
-            <Dashboard />
+            <Dashboard darkMode={darkMode} setDarkMode={setDarkMode} />
+          )
+        }
+      />
+
+      {/* Settings */}
+      <Route
+        path="/settings"
+        element={
+          !session ? (
+            <Navigate to="/" replace />
+          ) : !onboardingCompleted ? (
+            <Navigate to="/onboarding" replace />
+          ) : (
+            <Settings darkMode={darkMode} setDarkMode={setDarkMode} />
           )
         }
       />

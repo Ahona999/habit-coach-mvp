@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 
-export default function Dashboard() {
+export default function Dashboard({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -13,6 +13,27 @@ export default function Dashboard() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [openMenu, setOpenMenu] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Theme colors
+  const theme = darkMode ? {
+    bg: "#0f172a",
+    cardBg: "#1e293b",
+    border: "#334155",
+    text: "#f8fafc",
+    textSecondary: "#94a3b8",
+    primary: "#6366f1",
+    sidebarBg: "#1e293b",
+    inputBg: "#334155",
+  } : {
+    bg: "#f8fafc",
+    cardBg: "#ffffff",
+    border: "#e5e5e5",
+    text: "#171717",
+    textSecondary: "#666666",
+    primary: "#4f46e5",
+    sidebarBg: "#ffffff",
+    inputBg: "#ffffff",
+  };
 
   // Form state
   const [habitName, setHabitName] = useState("");
@@ -282,42 +303,47 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
+      <div style={{ ...styles.loadingContainer, backgroundColor: theme.bg, color: theme.text }}>
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, backgroundColor: theme.bg }}>
       {/* Sidebar */}
       <aside style={{
         ...styles.sidebar,
         width: sidebarCollapsed ? "60px" : "200px",
+        backgroundColor: theme.sidebarBg,
+        borderColor: theme.border,
       }}>
-        <div style={styles.sidebarHeader}>
-          {!sidebarCollapsed && <h1 style={styles.logo}>Bloom</h1>}
+        <div style={{ ...styles.sidebarHeader, borderColor: theme.border }}>
+          {!sidebarCollapsed && <h1 style={{ ...styles.logo, color: theme.text }}>Bloom</h1>}
           <button 
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            style={styles.collapseBtn}
+            style={{ ...styles.collapseBtn, color: theme.textSecondary }}
           >
             {sidebarCollapsed ? "→" : "←"}
           </button>
         </div>
         
         <nav style={styles.nav}>
-          <button style={styles.navItemActive}>
+          <button style={{ ...styles.navItemActive, backgroundColor: darkMode ? "#312e81" : "#eff6ff" }}>
             <span style={styles.navIcon}>📊</span>
             {!sidebarCollapsed && <span>Dashboard</span>}
           </button>
-          <button style={styles.navItem}>
+          <button 
+            onClick={() => navigate("/settings")}
+            style={{ ...styles.navItem, color: theme.textSecondary }}
+          >
             <span style={styles.navIcon}>⚙️</span>
             {!sidebarCollapsed && <span>Settings</span>}
           </button>
         </nav>
 
-        <div style={styles.sidebarFooter}>
-          <button onClick={handleLogout} style={styles.logoutBtn}>
+        <div style={{ ...styles.sidebarFooter, borderColor: theme.border }}>
+          <button onClick={handleLogout} style={{ ...styles.logoutBtn, color: theme.textSecondary }}>
             <span style={styles.navIcon}>🚪</span>
             {!sidebarCollapsed && <span>Logout</span>}
           </button>
@@ -329,10 +355,10 @@ export default function Dashboard() {
         {/* Header */}
         <header style={styles.header}>
           <div>
-            <h1 style={styles.greeting}>{getGreeting()}, {userName}</h1>
-            <p style={styles.subtitle}>Track your progress and build better habits.</p>
+            <h1 style={{ ...styles.greeting, color: theme.text }}>{getGreeting()}, {userName}</h1>
+            <p style={{ ...styles.subtitle, color: theme.textSecondary }}>Track your progress and build better habits.</p>
           </div>
-          <button onClick={() => setShowAddForm(true)} style={styles.addBtn}>
+          <button onClick={() => setShowAddForm(true)} style={{ ...styles.addBtn, backgroundColor: theme.primary }}>
             Add Habit +
           </button>
         </header>
@@ -343,12 +369,12 @@ export default function Dashboard() {
           <div style={styles.leftColumn}>
             {/* Add/Edit Form */}
             {showAddForm && (
-              <div style={styles.formCard}>
+              <div style={{ ...styles.formCard, backgroundColor: theme.cardBg, borderColor: theme.border }}>
                 <div style={styles.formHeader}>
-                  <h2 style={styles.formTitle}>
+                  <h2 style={{ ...styles.formTitle, color: theme.text }}>
                     {editingHabit ? "Edit Habit" : "Add New Habit"}
                   </h2>
-                  <button onClick={resetForm} style={styles.closeBtn}>✕</button>
+                  <button onClick={resetForm} style={{ ...styles.closeBtn, color: theme.textSecondary }}>✕</button>
                 </div>
                 <form onSubmit={handleSubmit} style={styles.form}>
                   <input
@@ -356,14 +382,14 @@ export default function Dashboard() {
                     placeholder="Habit name"
                     value={habitName}
                     onChange={(e) => setHabitName(e.target.value)}
-                    style={styles.input}
+                    style={{ ...styles.input, backgroundColor: theme.inputBg, borderColor: theme.border, color: theme.text }}
                   />
                   <div style={styles.formRow}>
-                    <select value={frequency} onChange={(e) => setFrequency(e.target.value)} style={styles.select}>
+                    <select value={frequency} onChange={(e) => setFrequency(e.target.value)} style={{ ...styles.select, backgroundColor: theme.inputBg, borderColor: theme.border, color: theme.text }}>
                       <option value="Daily">Daily</option>
                       <option value="Weekly">Weekly</option>
                     </select>
-                    <select value={preferredTime} onChange={(e) => setPreferredTime(e.target.value)} style={styles.select}>
+                    <select value={preferredTime} onChange={(e) => setPreferredTime(e.target.value)} style={{ ...styles.select, backgroundColor: theme.inputBg, borderColor: theme.border, color: theme.text }}>
                       <option value="Morning">Morning</option>
                       <option value="Afternoon">Afternoon</option>
                       <option value="Evening">Evening</option>
@@ -384,10 +410,10 @@ export default function Dashboard() {
                     ))}
                   </div>
                   <div style={styles.formActions}>
-                    <button type="submit" disabled={saving || !habitName.trim()} style={styles.saveBtn}>
+                    <button type="submit" disabled={saving || !habitName.trim()} style={{ ...styles.saveBtn, backgroundColor: theme.primary }}>
                       {saving ? "Saving..." : editingHabit ? "Update" : "Add Habit"}
                     </button>
-                    <button type="button" onClick={resetForm} style={styles.cancelBtn}>Cancel</button>
+                    <button type="button" onClick={resetForm} style={{ ...styles.cancelBtn, borderColor: theme.border, color: theme.textSecondary }}>Cancel</button>
                   </div>
                 </form>
               </div>
@@ -396,14 +422,14 @@ export default function Dashboard() {
             {/* Habits Section */}
             <div style={styles.habitsSection}>
               <div style={styles.habitsHeader}>
-                <h2 style={styles.sectionTitle}>Your Habits</h2>
-                <select style={styles.filterSelect}>
+                <h2 style={{ ...styles.sectionTitle, color: theme.text }}>Your Habits</h2>
+                <select style={{ ...styles.filterSelect, backgroundColor: theme.cardBg, borderColor: theme.border, color: theme.text }}>
                   <option>Today</option>
                 </select>
               </div>
 
               {habits.length === 0 ? (
-                <div style={styles.emptyState}>
+                <div style={{ ...styles.emptyState, backgroundColor: theme.cardBg, borderColor: theme.border, color: theme.textSecondary }}>
                   <p>No habits yet. Click "Add Habit +" to get started!</p>
                 </div>
               ) : (
@@ -412,7 +438,7 @@ export default function Dashboard() {
                   const dots = generateDots(habit);
                   
                   return (
-                    <div key={habit.id} style={styles.habitCard}>
+                    <div key={habit.id} style={{ ...styles.habitCard, backgroundColor: theme.cardBg, borderColor: theme.border }}>
                       <div style={styles.habitTop}>
                         <div style={styles.habitLeft}>
                           <div style={{
@@ -422,26 +448,26 @@ export default function Dashboard() {
                             ✓
                           </div>
                           <div>
-                            <h3 style={styles.habitName}>{habit.title}</h3>
-                            <p style={styles.habitFreq}>{habit.frequency || "Daily"}</p>
+                            <h3 style={{ ...styles.habitName, color: theme.text }}>{habit.title}</h3>
+                            <p style={{ ...styles.habitFreq, color: theme.textSecondary }}>{habit.frequency || "Daily"}</p>
                           </div>
                         </div>
                         <div style={styles.habitRight}>
                           <span style={styles.streak}>🔥 {stats.streak}d</span>
-                          <span style={styles.percentage}>{stats.percentage}%</span>
+                          <span style={{ ...styles.percentage, color: theme.textSecondary }}>{stats.percentage}%</span>
                           <div style={styles.menuContainer}>
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setOpenMenu(openMenu === habit.id ? null : habit.id);
                               }}
-                              style={styles.menuBtn}
+                              style={{ ...styles.menuBtn, color: theme.textSecondary }}
                             >
                               •••
                             </button>
                             {openMenu === habit.id && (
-                              <div style={styles.dropdown}>
-                                <button onClick={() => handleEdit(habit)} style={styles.dropdownItem}>
+                              <div style={{ ...styles.dropdown, backgroundColor: theme.cardBg, borderColor: theme.border }}>
+                                <button onClick={() => handleEdit(habit)} style={{ ...styles.dropdownItem, color: theme.text }}>
                                   ✏️ Edit
                                 </button>
                                 <button 
@@ -483,13 +509,13 @@ export default function Dashboard() {
           {/* Right Column - Calendar & AI */}
           <div style={styles.rightColumn}>
             {/* Calendar */}
-            <div style={styles.calendarCard}>
-              <h3 style={styles.calendarTitle}>Activity Calendar</h3>
-              <p style={styles.calendarMonth}>{currentMonth} {currentYear}</p>
+            <div style={{ ...styles.calendarCard, backgroundColor: theme.cardBg, borderColor: theme.border }}>
+              <h3 style={{ ...styles.calendarTitle, color: theme.text }}>Activity Calendar</h3>
+              <p style={{ ...styles.calendarMonth, color: theme.textSecondary }}>{currentMonth} {currentYear}</p>
               
               <div style={styles.calendarGrid}>
                 {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-                  <div key={day} style={styles.calendarDay}>{day}</div>
+                  <div key={day} style={{ ...styles.calendarDay, color: theme.textSecondary }}>{day}</div>
                 ))}
                 {getDaysInMonth().map((day, idx) => (
                   <div
@@ -497,8 +523,8 @@ export default function Dashboard() {
                     style={{
                       ...styles.calendarDate,
                       backgroundColor: day === currentDay ? "#3b82f6" : 
-                                       day && day < currentDay ? "#dbeafe" : "transparent",
-                      color: day === currentDay ? "#fff" : "#171717",
+                                       day && day < currentDay ? (darkMode ? "#1e3a5f" : "#dbeafe") : "transparent",
+                      color: day === currentDay ? "#fff" : theme.text,
                     }}
                   >
                     {day}
@@ -506,10 +532,10 @@ export default function Dashboard() {
                 ))}
               </div>
               
-              <div style={styles.calendarLegend}>
+              <div style={{ ...styles.calendarLegend, color: theme.textSecondary }}>
                 <span>Less</span>
-                <div style={{...styles.legendDot, backgroundColor: "#eff6ff"}} />
-                <div style={{...styles.legendDot, backgroundColor: "#bfdbfe"}} />
+                <div style={{...styles.legendDot, backgroundColor: darkMode ? "#1e293b" : "#eff6ff"}} />
+                <div style={{...styles.legendDot, backgroundColor: darkMode ? "#1e3a5f" : "#bfdbfe"}} />
                 <div style={{...styles.legendDot, backgroundColor: "#60a5fa"}} />
                 <div style={{...styles.legendDot, backgroundColor: "#2563eb"}} />
                 <span>More</span>
@@ -517,13 +543,13 @@ export default function Dashboard() {
             </div>
 
             {/* AI Insights */}
-            <div style={styles.aiCard}>
-              <h3 style={styles.aiTitle}>🤖 AI Insights</h3>
-              <div style={styles.aiInsight}>
+            <div style={{ ...styles.aiCard, backgroundColor: theme.cardBg, borderColor: theme.border }}>
+              <h3 style={{ ...styles.aiTitle, color: theme.text }}>🤖 AI Insights</h3>
+              <div style={{ ...styles.aiInsight, backgroundColor: darkMode ? "#3b1c1c" : "#fef2f2" }}>
                 <span style={styles.aiIcon}>💡</span>
                 <div>
-                  <p style={styles.aiHeading}>Remarkable effort!</p>
-                  <p style={styles.aiText}>
+                  <p style={{ ...styles.aiHeading, color: darkMode ? "#fca5a5" : "#b91c1c" }}>Remarkable effort!</p>
+                  <p style={{ ...styles.aiText, color: darkMode ? "#fca5a5" : "#b91c1c" }}>
                     {habits.length > 0 
                       ? `You're tracking ${habits.length} habit${habits.length > 1 ? 's' : ''}. Keep up the great work!`
                       : "Add your first habit to start building better routines!"}
@@ -538,13 +564,13 @@ export default function Dashboard() {
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
         <div style={styles.modalOverlay}>
-          <div style={styles.modal}>
-            <h3 style={styles.modalTitle}>Delete Habit?</h3>
-            <p style={styles.modalText}>
+          <div style={{ ...styles.modal, backgroundColor: theme.cardBg }}>
+            <h3 style={{ ...styles.modalTitle, color: theme.text }}>Delete Habit?</h3>
+            <p style={{ ...styles.modalText, color: theme.textSecondary }}>
               Are you sure you want to delete this habit? This action cannot be undone.
             </p>
             <div style={styles.modalActions}>
-              <button onClick={() => setDeleteConfirm(null)} style={styles.cancelBtn}>
+              <button onClick={() => setDeleteConfirm(null)} style={{ ...styles.cancelBtn, borderColor: theme.border, color: theme.textSecondary }}>
                 Cancel
               </button>
               <button onClick={handleDelete} style={styles.deleteBtn}>
