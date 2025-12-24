@@ -16,8 +16,10 @@ export default function App() {
 
     // Initialize auth - get current session
     const initializeAuth = async () => {
+      console.log("Starting auth initialization...");
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
+        console.log("Got session:", session ? "yes" : "no", error ? `Error: ${error.message}` : "");
 
         if (!isMounted) return;
 
@@ -30,11 +32,14 @@ export default function App() {
         setSession(session);
 
         if (session?.user) {
-          const { data } = await supabase
+          console.log("Fetching user profile for:", session.user.id);
+          const { data, error: profileError } = await supabase
             .from("user_profiles")
             .select("onboarding_completed")
             .eq("user_id", session.user.id)
             .maybeSingle();
+
+          console.log("Profile data:", data, profileError ? `Error: ${profileError.message}` : "");
 
           if (isMounted) {
             setOnboardingCompleted(data?.onboarding_completed === true);
@@ -42,6 +47,7 @@ export default function App() {
         }
 
         if (isMounted) {
+          console.log("Auth initialization complete, setting loading to false");
           setLoading(false);
         }
       } catch (error) {
@@ -53,6 +59,14 @@ export default function App() {
     };
 
     initializeAuth();
+
+    // Fallback timeout - if loading takes more than 5 seconds, force stop loading
+    const timeout = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn("Auth initialization timed out, forcing loading to false");
+        setLoading(false);
+      }
+    }, 5000);
 
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -98,6 +112,7 @@ export default function App() {
     // Cleanup
     return () => {
       isMounted = false;
+      clearTimeout(timeout);
       subscription.unsubscribe();
       window.removeEventListener("onboardingCompleted", handleOnboardingComplete);
     };
