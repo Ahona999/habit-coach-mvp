@@ -14,6 +14,7 @@ export default function Dashboard({ darkMode, setDarkMode }) {
   const [openMenu, setOpenMenu] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isNarrow, setIsNarrow] = useState(window.innerWidth < 1100);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Theme colors - darker black theme
@@ -97,7 +98,9 @@ export default function Dashboard({ darkMode, setDarkMode }) {
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
+      const narrow = window.innerWidth < 1100;
       setIsMobile(mobile);
+      setIsNarrow(narrow);
       if (mobile) {
         setSidebarCollapsed(true);
         setMobileMenuOpen(false);
@@ -509,7 +512,8 @@ export default function Dashboard({ darkMode, setDarkMode }) {
         {/* Content Grid */}
         <div style={{
           ...styles.contentGrid,
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 320px",
+          gridTemplateColumns: isNarrow ? "1fr" : "1fr 340px",
+          gap: isNarrow ? "16px" : "24px",
         }}>
           {/* Left Column - Habits */}
           <div style={styles.leftColumn}>
@@ -642,7 +646,7 @@ export default function Dashboard({ darkMode, setDarkMode }) {
                       {/* Completion Dots */}
                       <div style={{
                         ...styles.dotsContainer,
-                        gap: isMobile ? "3px" : "4px",
+                        gap: isMobile ? "4px" : "6px",
                       }}>
                         {dots.map((dot, idx) => (
                           <div
@@ -650,14 +654,15 @@ export default function Dashboard({ darkMode, setDarkMode }) {
                             onClick={() => toggleCheckin(habit.id, dot.date)}
                             style={{
                               ...styles.dot,
-                              width: isMobile ? "16px" : "20px",
-                              height: isMobile ? "16px" : "20px",
+                              width: isMobile ? "14px" : "18px",
+                              height: isMobile ? "14px" : "18px",
                               backgroundColor: dot.isCompleted 
                                 ? (habit.color || "#4f46e5") 
-                                : "#e5e5e5",
-                              border: dot.isToday ? "2px solid #000" : "none",
+                                : (darkMode ? "#374151" : "#e5e5e5"),
+                              border: dot.isToday ? `2px solid ${theme.text}` : "none",
+                              boxSizing: "border-box",
                             }}
-                            title={`${dot.monthName} ${dot.dayNum}: ${dot.isCompleted ? "Completed - Click to undo" : "Not completed - Click to mark complete"}`}
+                            title={`${dot.monthName} ${dot.dayNum}: ${dot.isCompleted ? "Completed ✓" : "Not completed"}`}
                           />
                         ))}
                       </div>
@@ -881,8 +886,10 @@ const styles = {
   header: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: "24px",
+    gap: "20px",
+    flexWrap: "wrap",
   },
   greeting: {
     fontSize: "28px",
@@ -1127,14 +1134,18 @@ const styles = {
   dotsContainer: {
     display: "flex",
     flexWrap: "wrap",
-    gap: "4px",
+    gap: "6px",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "8px 0",
   },
   dot: {
-    width: "20px",
-    height: "20px",
+    width: "18px",
+    height: "18px",
     borderRadius: "50%",
     cursor: "pointer",
-    transition: "transform 0.1s",
+    transition: "transform 0.1s, background-color 0.15s",
+    flexShrink: 0,
   },
   // Calendar
   calendarCard: {
