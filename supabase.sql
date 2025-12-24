@@ -10,8 +10,18 @@ create table if not exists habits (
   user_id uuid references auth.users(id) on delete cascade,
   title text not null,
   description text,
-  created_at timestamp with time zone default now()
+  frequency text, -- Daily or Weekly
+  preferred_time text, -- Morning, Afternoon, or Evening
+  color text, -- Hex color code
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
 );
+
+-- Add columns if they don't exist (for existing databases)
+alter table habits add column if not exists frequency text;
+alter table habits add column if not exists preferred_time text;
+alter table habits add column if not exists color text;
+alter table habits add column if not exists updated_at timestamp with time zone default now();
 
 -- HABIT CHECKINS
 create table if not exists habit_checkins (
