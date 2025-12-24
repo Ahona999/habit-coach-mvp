@@ -366,7 +366,7 @@ export default function Dashboard({ darkMode, setDarkMode }) {
       {/* Sidebar */}
       <aside style={{
         ...styles.sidebar,
-        width: isMobile ? "240px" : (sidebarCollapsed ? "60px" : "200px"),
+        width: isMobile ? "240px" : (sidebarCollapsed ? "64px" : "220px"),
         backgroundColor: theme.sidebarBg,
         borderColor: theme.border,
         ...(isMobile && {
@@ -378,14 +378,28 @@ export default function Dashboard({ darkMode, setDarkMode }) {
           transition: "left 0.3s ease",
         }),
       }}>
-        <div style={{ ...styles.sidebarHeader, borderColor: theme.border }}>
-          <h1 style={{ ...styles.logo, color: theme.text }}>Bloom</h1>
+        <div style={{ 
+          ...styles.sidebarHeader, 
+          borderColor: theme.border,
+          justifyContent: sidebarCollapsed && !isMobile ? "center" : "space-between",
+          padding: sidebarCollapsed && !isMobile ? "20px 12px" : "20px 16px",
+        }}>
+          {(!sidebarCollapsed || isMobile) && (
+            <h1 style={{ ...styles.logo, color: theme.text }}>Bloom</h1>
+          )}
           {!isMobile && (
             <button 
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              style={{ ...styles.collapseBtn, color: theme.textSecondary }}
+              style={{ 
+                ...styles.collapseBtn, 
+                color: theme.textSecondary,
+                padding: "6px 10px",
+                borderRadius: "6px",
+                backgroundColor: darkMode ? "#262626" : "#f5f5f5",
+              }}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {sidebarCollapsed ? "→" : "←"}
+              {sidebarCollapsed ? "›" : "‹"}
             </button>
           )}
           {isMobile && (
@@ -399,23 +413,46 @@ export default function Dashboard({ darkMode, setDarkMode }) {
         </div>
         
         <nav style={styles.nav}>
-          <button style={{ ...styles.navItemActive, backgroundColor: darkMode ? "#312e81" : "#eff6ff" }}>
+          <button 
+            style={{ 
+              ...styles.navItemActive, 
+              backgroundColor: darkMode ? "#312e81" : "#eff6ff",
+              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
+              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+            }}
+            title="Dashboard"
+          >
             <span style={styles.navIcon}>📊</span>
-            <span>Dashboard</span>
+            {(!sidebarCollapsed || isMobile) && <span>Dashboard</span>}
           </button>
           <button 
             onClick={() => navigate("/settings")}
-            style={{ ...styles.navItem, color: theme.textSecondary }}
+            style={{ 
+              ...styles.navItem, 
+              color: theme.textSecondary,
+              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
+              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+            }}
+            title="Settings"
           >
             <span style={styles.navIcon}>⚙️</span>
-            <span>Settings</span>
+            {(!sidebarCollapsed || isMobile) && <span>Settings</span>}
           </button>
         </nav>
 
         <div style={{ ...styles.sidebarFooter, borderColor: theme.border }}>
-          <button onClick={handleLogout} style={{ ...styles.logoutBtn, color: theme.textSecondary }}>
+          <button 
+            onClick={handleLogout} 
+            style={{ 
+              ...styles.logoutBtn, 
+              color: theme.textSecondary,
+              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
+              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+            }}
+            title="Logout"
+          >
             <span style={styles.navIcon}>🚪</span>
-            <span>Logout</span>
+            {(!sidebarCollapsed || isMobile) && <span>Logout</span>}
           </button>
         </div>
       </aside>
@@ -423,17 +460,17 @@ export default function Dashboard({ darkMode, setDarkMode }) {
       {/* Main Content */}
       <main style={{
         ...styles.main,
-        marginLeft: isMobile ? 0 : (sidebarCollapsed ? "60px" : "200px"),
+        marginLeft: isMobile ? 0 : (sidebarCollapsed ? "64px" : "220px"),
         padding: isMobile ? "16px" : "24px 32px",
       }}>
         {/* Header */}
         <header style={{
           ...styles.header,
           flexDirection: isMobile ? "column" : "row",
-          alignItems: isMobile ? "flex-start" : "flex-start",
+          alignItems: isMobile ? "flex-start" : "center",
           gap: isMobile ? "16px" : "0",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
             {isMobile && (
               <button 
                 onClick={(e) => { e.stopPropagation(); setMobileMenuOpen(true); }}
@@ -457,9 +494,15 @@ export default function Dashboard({ darkMode, setDarkMode }) {
               ...styles.addBtn, 
               backgroundColor: theme.primary,
               width: isMobile ? "100%" : "auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              whiteSpace: "nowrap",
             }}
           >
-            Add Habit +
+            <span>Add Habit</span>
+            <span style={{ fontSize: "18px", fontWeight: "400" }}>+</span>
           </button>
         </header>
 
@@ -750,67 +793,83 @@ const styles = {
     borderBottom: "1px solid #e5e5e5",
   },
   logo: {
-    fontSize: "20px",
+    fontSize: "22px",
     fontWeight: "700",
     margin: 0,
+    letterSpacing: "-0.5px",
   },
   collapseBtn: {
     background: "none",
     border: "none",
-    fontSize: "16px",
+    fontSize: "14px",
     cursor: "pointer",
     color: "#666",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background-color 0.15s",
   },
   nav: {
-    padding: "16px 8px",
+    padding: "12px",
     flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
   },
   navItem: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "12px",
+    padding: "12px 16px",
     width: "100%",
     border: "none",
     background: "none",
-    borderRadius: "8px",
+    borderRadius: "10px",
     cursor: "pointer",
     fontSize: "14px",
+    fontWeight: "500",
     color: "#666",
+    transition: "background-color 0.15s, color 0.15s",
   },
   navItemActive: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "12px",
+    padding: "12px 16px",
     width: "100%",
     border: "none",
     background: "#eff6ff",
-    borderRadius: "8px",
+    borderRadius: "10px",
     cursor: "pointer",
     fontSize: "14px",
     color: "#3b82f6",
-    fontWeight: "500",
+    fontWeight: "600",
   },
   navIcon: {
     fontSize: "18px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "20px",
   },
   sidebarFooter: {
-    padding: "16px 8px",
+    padding: "12px",
     borderTop: "1px solid #e5e5e5",
   },
   logoutBtn: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "12px",
+    padding: "12px 16px",
     width: "100%",
     border: "none",
     background: "none",
-    borderRadius: "8px",
+    borderRadius: "10px",
     cursor: "pointer",
     fontSize: "14px",
+    fontWeight: "500",
     color: "#666",
+    transition: "background-color 0.15s, color 0.15s",
   },
   // Main
   main: {
@@ -837,14 +896,19 @@ const styles = {
     margin: 0,
   },
   addBtn: {
-    padding: "12px 24px",
+    padding: "12px 20px",
     backgroundColor: "#4f46e5",
     color: "#fff",
     border: "none",
-    borderRadius: "8px",
-    fontSize: "14px",
+    borderRadius: "10px",
+    fontSize: "15px",
     fontWeight: "600",
     cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    boxShadow: "0 2px 8px rgba(79, 70, 229, 0.3)",
+    transition: "transform 0.15s, box-shadow 0.15s",
   },
   // Content Grid
   contentGrid: {

@@ -125,7 +125,7 @@ export default function Settings({ darkMode, setDarkMode }) {
       {/* Sidebar */}
       <aside style={{
         ...styles.sidebar,
-        width: isMobile ? "240px" : (sidebarCollapsed ? "60px" : "200px"),
+        width: isMobile ? "240px" : (sidebarCollapsed ? "64px" : "220px"),
         backgroundColor: theme.sidebarBg,
         borderColor: theme.border,
         ...(isMobile && {
@@ -137,14 +137,28 @@ export default function Settings({ darkMode, setDarkMode }) {
           transition: "left 0.3s ease",
         }),
       }}>
-        <div style={{ ...styles.sidebarHeader, borderColor: theme.border }}>
-          <h1 style={{ ...styles.logo, color: theme.text }}>Bloom</h1>
+        <div style={{ 
+          ...styles.sidebarHeader, 
+          borderColor: theme.border,
+          justifyContent: sidebarCollapsed && !isMobile ? "center" : "space-between",
+          padding: sidebarCollapsed && !isMobile ? "20px 12px" : "20px 16px",
+        }}>
+          {(!sidebarCollapsed || isMobile) && (
+            <h1 style={{ ...styles.logo, color: theme.text }}>Bloom</h1>
+          )}
           {!isMobile && (
             <button 
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              style={{ ...styles.collapseBtn, color: theme.textSecondary }}
+              style={{ 
+                ...styles.collapseBtn, 
+                color: theme.textSecondary,
+                padding: "6px 10px",
+                borderRadius: "6px",
+                backgroundColor: darkMode ? "#262626" : "#f5f5f5",
+              }}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {sidebarCollapsed ? "→" : "←"}
+              {sidebarCollapsed ? "›" : "‹"}
             </button>
           )}
           {isMobile && (
@@ -160,35 +174,55 @@ export default function Settings({ darkMode, setDarkMode }) {
         <nav style={styles.nav}>
           <button 
             onClick={() => navigate("/dashboard")}
-            style={{ ...styles.navItem, color: theme.textSecondary }}
+            style={{ 
+              ...styles.navItem, 
+              color: theme.textSecondary,
+              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
+              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+            }}
+            title="Dashboard"
           >
             <span style={styles.navIcon}>📊</span>
-            <span>Dashboard</span>
+            {(!sidebarCollapsed || isMobile) && <span>Dashboard</span>}
           </button>
-          <button style={{ ...styles.navItemActive, backgroundColor: darkMode ? "#312e81" : "#eff6ff" }}>
+          <button 
+            style={{ 
+              ...styles.navItemActive, 
+              backgroundColor: darkMode ? "#312e81" : "#eff6ff",
+              justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start",
+              padding: sidebarCollapsed && !isMobile ? "12px" : "12px 16px",
+            }}
+            title="Settings"
+          >
             <span style={styles.navIcon}>⚙️</span>
-            <span>Settings</span>
+            {(!sidebarCollapsed || isMobile) && <span>Settings</span>}
           </button>
         </nav>
 
         {/* User Profile at bottom */}
         <div style={{ ...styles.sidebarFooter, borderColor: theme.border }}>
-          <div style={styles.userProfile}>
-            <div style={styles.avatar}>
+          {(!sidebarCollapsed || isMobile) ? (
+            <div style={styles.userProfile}>
+              <div style={styles.avatar}>
+                {userName.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p style={{ ...styles.userName, color: theme.text }}>{userName}</p>
+                <p style={{ ...styles.userPlan, color: theme.textSecondary }}>{userPlan}</p>
+              </div>
+            </div>
+          ) : (
+            <div style={{ ...styles.avatar, margin: "0 auto" }}>
               {userName.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <p style={{ ...styles.userName, color: theme.text }}>{userName}</p>
-              <p style={{ ...styles.userPlan, color: theme.textSecondary }}>{userPlan}</p>
-            </div>
-          </div>
+          )}
         </div>
       </aside>
 
       {/* Main Content */}
       <main style={{
         ...styles.main,
-        marginLeft: isMobile ? 0 : (sidebarCollapsed ? "60px" : "200px"),
+        marginLeft: isMobile ? 0 : (sidebarCollapsed ? "64px" : "220px"),
         padding: isMobile ? "24px 16px" : "48px",
       }}>
         <div style={{ ...styles.mainInner, padding: isMobile ? "0" : undefined }}>
@@ -387,50 +421,64 @@ const styles = {
     borderBottom: "1px solid",
   },
   logo: {
-    fontSize: "20px",
+    fontSize: "22px",
     fontWeight: "700",
     margin: 0,
+    letterSpacing: "-0.5px",
   },
   collapseBtn: {
     background: "none",
     border: "none",
-    fontSize: "16px",
+    fontSize: "14px",
     cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background-color 0.15s",
   },
   nav: {
-    padding: "16px 8px",
+    padding: "12px",
     flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
   },
   navItem: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "12px",
+    padding: "12px 16px",
     width: "100%",
     border: "none",
     background: "none",
-    borderRadius: "8px",
+    borderRadius: "10px",
     cursor: "pointer",
     fontSize: "14px",
+    fontWeight: "500",
+    transition: "background-color 0.15s, color 0.15s",
   },
   navItemActive: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "12px",
+    padding: "12px 16px",
     width: "100%",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "10px",
     cursor: "pointer",
     fontSize: "14px",
-    color: "#4f46e5",
-    fontWeight: "500",
+    color: "#3b82f6",
+    fontWeight: "600",
   },
   navIcon: {
     fontSize: "18px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "20px",
   },
   sidebarFooter: {
-    padding: "16px",
+    padding: "12px",
     borderTop: "1px solid",
   },
   userProfile: {
@@ -439,16 +487,16 @@ const styles = {
     gap: "12px",
   },
   avatar: {
-    width: "40px",
-    height: "40px",
+    width: "36px",
+    height: "36px",
     borderRadius: "50%",
-    backgroundColor: "#e5e5e5",
+    backgroundColor: "#4f46e5",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "16px",
+    fontSize: "14px",
     fontWeight: "600",
-    color: "#666",
+    color: "#fff",
   },
   userName: {
     fontSize: "14px",
