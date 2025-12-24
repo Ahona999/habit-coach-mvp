@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
 
 export default function Dashboard() {
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [habits, setHabits] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
@@ -31,35 +30,54 @@ export default function Dashboard() {
   }, []);
 
   const fetchData = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error("Error getting user:", userError);
+        setError(userError.message);
+        setLoading(false);
+        return;
+      }
 
-    if (user) {
-      // Fetch user profile
-      const { data: profileData } = await supabase
-        .from("user_profiles")
-        .select("display_name, full_name")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      if (user) {
+        // Fetch user profile
+        const { data: profileData, error: profileError } = await supabase
+          .from("user_profiles")
+          .select("display_name, full_name")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-      const name =
-        profileData?.display_name ||
-        profileData?.full_name ||
-        user.email?.split("@")[0] ||
-        "User";
-      setUserName(name);
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+        }
 
-      // Fetch habits
-      const { data: habitsData } = await supabase
-        .from("habits")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        const name =
+          profileData?.display_name ||
+          profileData?.full_name ||
+          user.email?.split("@")[0] ||
+          "User";
+        setUserName(name);
 
-      setHabits(habitsData || []);
+        // Fetch habits
+        const { data: habitsData, error: habitsError } = await supabase
+          .from("habits")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (habitsError) {
+          console.error("Error fetching habits:", habitsError);
+        }
+
+        setHabits(habitsData || []);
+      }
+    } catch (err) {
+      console.error("Dashboard error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const resetForm = () => {
@@ -75,47 +93,47 @@ export default function Dashboard() {
     e.preventDefault();
     if (!habitName.trim()) return;
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
 
-    if (user) {
-      if (editingHabit) {
-        // Update existing habit
-        const { error } = await supabase
-          .from("habits")
-          .update({
+      if (user) {
+        if (editingHabit) {
+          const { error } = await supabase
+            .from("habits")
+            .update({
+              title: habitName.trim(),
+              frequency: frequency,
+              preferred_time: preferredTime,
+              color: selectedColor,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", editingHabit.id);
+
+          if (error) {
+            console.error("Error updating habit:", error);
+          } else {
+            await fetchData();
+            resetForm();
+          }
+        } else {
+          const { error } = await supabase.from("habits").insert({
+            user_id: user.id,
             title: habitName.trim(),
             frequency: frequency,
             preferred_time: preferredTime,
             color: selectedColor,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", editingHabit.id);
+          });
 
-        if (error) {
-          console.error("Error updating habit:", error);
-        } else {
-          await fetchData();
-          resetForm();
-        }
-      } else {
-        // Create new habit
-        const { error } = await supabase.from("habits").insert({
-          user_id: user.id,
-          title: habitName.trim(),
-          frequency: frequency,
-          preferred_time: preferredTime,
-          color: selectedColor,
-        });
-
-        if (error) {
-          console.error("Error adding habit:", error);
-        } else {
-          await fetchData();
-          resetForm();
+          if (error) {
+            console.error("Error adding habit:", error);
+          } else {
+            await fetchData();
+            resetForm();
+          }
         }
       }
+    } catch (err) {
+      console.error("Submit error:", err);
     }
   };
 
@@ -131,236 +149,120 @@ export default function Dashboard() {
   const handleDelete = async (habitId) => {
     if (!confirm("Are you sure you want to delete this habit?")) return;
 
-    const { error } = await supabase.from("habits").delete().eq("id", habitId);
+    try {
+      const { error } = await supabase.from("habits").delete().eq("id", habitId);
 
-    if (error) {
-      console.error("Error deleting habit:", error);
-    } else {
-      await fetchData();
+      if (error) {
+        console.error("Error deleting habit:", error);
+      } else {
+        await fetchData();
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
     }
   };
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Error signing out:", error);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error);
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
     }
   };
 
+  // Loading state
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#f6f9fc",
-        }}
-      >
-        <p style={{ fontFamily: "Satoshi, sans-serif", color: "#666" }}>
-          Loading...
-        </p>
+      <div style={styles.centerContainer}>
+        <p style={styles.loadingText}>Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div style={styles.centerContainer}>
+        <p style={styles.errorText}>Error: {error}</p>
+        <button onClick={fetchData} style={styles.primaryButton}>
+          Retry
+        </button>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#f6f9fc",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div style={styles.page}>
       {/* Header */}
-      <header
-        style={{
-          background: "#ffffff",
-          borderBottom: "1px solid #e5e5e5",
-          padding: "16px 32px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: "Satoshi, sans-serif",
-            fontSize: "24px",
-            fontWeight: 700,
-            color: "#171717",
-            margin: 0,
-          }}
-        >
-          Bloom
-        </h1>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span
-            style={{
-              fontFamily: "Satoshi, sans-serif",
-              fontSize: "16px",
-              color: "#666666",
-            }}
-          >
-            {userName}
-          </span>
-          <Button variant="secondary" size="medium" onClick={handleLogout}>
+      <header style={styles.header}>
+        <h1 style={styles.logo}>Bloom</h1>
+        <div style={styles.headerRight}>
+          <span style={styles.userName}>{userName}</span>
+          <button onClick={handleLogout} style={styles.logoutButton}>
             Logout
-          </Button>
+          </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main
-        style={{
-          flex: 1,
-          padding: "32px",
-          maxWidth: "1200px",
-          width: "100%",
-          margin: "0 auto",
-        }}
-      >
+      <main style={styles.main}>
         {/* Empty State */}
         {habits.length === 0 && !showAddForm && (
-          <div
-            style={{
-              background: "#ffffff",
-              border: "1px solid #e5e5e5",
-              borderRadius: "12px",
-              padding: "48px",
-              textAlign: "center",
-              maxWidth: "600px",
-              margin: "0 auto",
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: "Satoshi, sans-serif",
-                fontSize: "28px",
-                fontWeight: 700,
-                color: "#171717",
-                margin: "0 0 12px 0",
-              }}
-            >
-              Welcome to Bloom
-            </h2>
-            <p
-              style={{
-                fontFamily: "Satoshi, sans-serif",
-                fontSize: "16px",
-                color: "#666666",
-                margin: "0 0 32px 0",
-              }}
-            >
-              Start building habits that stick
-            </p>
-            <Button
-              variant="primary"
-              size="large"
+          <div style={styles.emptyCard}>
+            <h2 style={styles.emptyTitle}>Welcome to Bloom</h2>
+            <p style={styles.emptySubtitle}>Start building habits that stick</p>
+            <button
               onClick={() => setShowAddForm(true)}
+              style={styles.primaryButton}
             >
               Add your first habit
-            </Button>
+            </button>
           </div>
         )}
 
-        {/* Add/Edit Habit Form */}
+        {/* Add/Edit Form */}
         {showAddForm && (
-          <div
-            style={{
-              background: "#ffffff",
-              border: "1px solid #e5e5e5",
-              borderRadius: "12px",
-              padding: "32px",
-              marginBottom: "32px",
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: "Satoshi, sans-serif",
-                fontSize: "24px",
-                fontWeight: 700,
-                color: "#171717",
-                margin: "0 0 24px 0",
-              }}
-            >
+          <div style={styles.formCard}>
+            <h2 style={styles.formTitle}>
               {editingHabit ? "Edit Habit" : "Add New Habit"}
             </h2>
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-              <Input
-                label="Habit Name"
-                placeholder="E.g., Reading, Exercise"
-                value={habitName}
-                onChange={(e) => setHabitName(e.target.value)}
-                required
-              />
+            <form onSubmit={handleSubmit} style={styles.form}>
+              {/* Habit Name */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Habit Name</label>
+                <input
+                  type="text"
+                  placeholder="E.g., Reading, Exercise"
+                  value={habitName}
+                  onChange={(e) => setHabitName(e.target.value)}
+                  style={styles.input}
+                  required
+                />
+              </div>
 
-              <div>
-                <label
-                  style={{
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#171717",
-                    display: "block",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Frequency
-                </label>
+              {/* Frequency */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Frequency</label>
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: "48px",
-                    padding: "0 16px",
-                    border: "1px solid #e5e5e5",
-                    borderRadius: "8px",
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "16px",
-                    color: "#171717",
-                    backgroundColor: "#ffffff",
-                    outline: "none",
-                    cursor: "pointer",
-                  }}
+                  style={styles.select}
                 >
                   <option value="Daily">Daily</option>
                   <option value="Weekly">Weekly</option>
                 </select>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#171717",
-                    display: "block",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Preferred Time
-                </label>
+              {/* Preferred Time */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Preferred Time</label>
                 <select
                   value={preferredTime}
                   onChange={(e) => setPreferredTime(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: "48px",
-                    padding: "0 16px",
-                    border: "1px solid #e5e5e5",
-                    borderRadius: "8px",
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "16px",
-                    color: "#171717",
-                    backgroundColor: "#ffffff",
-                    outline: "none",
-                    cursor: "pointer",
-                  }}
+                  style={styles.select}
                 >
                   <option value="Morning">Morning</option>
                   <option value="Afternoon">Afternoon</option>
@@ -368,60 +270,48 @@ export default function Dashboard() {
                 </select>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#171717",
-                    display: "block",
-                    marginBottom: "12px",
-                  }}
-                >
-                  Color
-                </label>
-                <div style={{ display: "flex", gap: "8px" }}>
+              {/* Color */}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Color</label>
+                <div style={styles.colorPicker}>
                   {colors.map((color) => (
                     <button
                       key={color.value}
                       type="button"
                       onClick={() => setSelectedColor(color.value)}
                       style={{
-                        width: "40px",
-                        height: "40px",
-                        borderRadius: "50%",
+                        ...styles.colorDot,
                         backgroundColor: color.value,
-                        border:
-                          selectedColor === color.value
-                            ? "3px solid #171717"
-                            : "2px solid #e5e5e5",
-                        cursor: "pointer",
-                        outline: "none",
+                        border: selectedColor === color.value
+                          ? "3px solid #171717"
+                          : "2px solid #e5e5e5",
                       }}
-                      aria-label={`Select ${color.name} color`}
+                      aria-label={`Select ${color.name}`}
                     />
                   ))}
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
-                <Button
+              {/* Buttons */}
+              <div style={styles.formButtons}>
+                <button
                   type="submit"
-                  variant="primary"
-                  size="medium"
                   disabled={!habitName.trim()}
+                  style={{
+                    ...styles.primaryButton,
+                    opacity: habitName.trim() ? 1 : 0.5,
+                    cursor: habitName.trim() ? "pointer" : "not-allowed",
+                  }}
                 >
                   {editingHabit ? "Update Habit" : "Add Habit"}
-                </Button>
-                <Button
+                </button>
+                <button
                   type="button"
-                  variant="secondary"
-                  size="medium"
                   onClick={resetForm}
+                  style={styles.secondaryButton}
                 >
                   Cancel
-                </Button>
+                </button>
               </div>
             </form>
           </div>
@@ -429,108 +319,49 @@ export default function Dashboard() {
 
         {/* Habits List */}
         {habits.length > 0 && (
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "24px",
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: "Satoshi, sans-serif",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                  color: "#171717",
-                  margin: 0,
-                }}
-              >
-                Your Habits
-              </h2>
+          <div style={styles.habitsSection}>
+            <div style={styles.habitsHeader}>
+              <h2 style={styles.habitsTitle}>Your Habits</h2>
               {!showAddForm && (
-                <Button
-                  variant="primary"
-                  size="medium"
+                <button
                   onClick={() => setShowAddForm(true)}
+                  style={styles.primaryButton}
                 >
                   Add Habit
-                </Button>
+                </button>
               )}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={styles.habitsList}>
               {habits.map((habit) => (
-                <div
-                  key={habit.id}
-                  style={{
-                    background: "#ffffff",
-                    border: "1px solid #e5e5e5",
-                    borderRadius: "12px",
-                    padding: "24px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: 1 }}>
-                    {/* Color Indicator */}
+                <div key={habit.id} style={styles.habitCard}>
+                  <div style={styles.habitLeft}>
                     <div
                       style={{
-                        width: "48px",
-                        height: "48px",
-                        borderRadius: "50%",
+                        ...styles.habitColor,
                         backgroundColor: habit.color || "#4f46e5",
-                        flexShrink: 0,
                       }}
                     />
-
-                    {/* Habit Info */}
-                    <div style={{ flex: 1 }}>
-                      <h3
-                        style={{
-                          fontFamily: "Satoshi, sans-serif",
-                          fontSize: "20px",
-                          fontWeight: 700,
-                          color: "#171717",
-                          margin: "0 0 8px 0",
-                        }}
-                      >
-                        {habit.title}
-                      </h3>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "16px",
-                          fontFamily: "Satoshi, sans-serif",
-                          fontSize: "14px",
-                          color: "#666666",
-                        }}
-                      >
-                        <span>{habit.frequency || "Daily"}</span>
-                        <span>•</span>
-                        <span>{habit.preferred_time || "Morning"}</span>
-                      </div>
+                    <div style={styles.habitInfo}>
+                      <h3 style={styles.habitName}>{habit.title}</h3>
+                      <p style={styles.habitMeta}>
+                        {habit.frequency || "Daily"} • {habit.preferred_time || "Morning"}
+                      </p>
                     </div>
                   </div>
-
-                  {/* Actions */}
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <Button
-                      variant="secondary"
-                      size="small"
+                  <div style={styles.habitActions}>
+                    <button
                       onClick={() => handleEdit(habit)}
+                      style={styles.editButton}
                     >
                       Edit
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="small"
+                    </button>
+                    <button
                       onClick={() => handleDelete(habit.id)}
+                      style={styles.deleteButton}
                     >
                       Delete
-                    </Button>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -541,3 +372,246 @@ export default function Dashboard() {
     </div>
   );
 }
+
+// Inline styles - simple and stable
+const styles = {
+  page: {
+    minHeight: "100vh",
+    backgroundColor: "#f5f5f5",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+  },
+  centerContainer: {
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "16px",
+    backgroundColor: "#f5f5f5",
+  },
+  loadingText: {
+    fontSize: "18px",
+    color: "#666",
+  },
+  errorText: {
+    fontSize: "18px",
+    color: "#dc2626",
+  },
+  header: {
+    backgroundColor: "#ffffff",
+    borderBottom: "1px solid #e5e5e5",
+    padding: "16px 32px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  logo: {
+    fontSize: "24px",
+    fontWeight: "700",
+    color: "#171717",
+    margin: 0,
+  },
+  headerRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+  },
+  userName: {
+    fontSize: "16px",
+    color: "#666",
+  },
+  logoutButton: {
+    padding: "8px 16px",
+    backgroundColor: "#f5f5f5",
+    border: "1px solid #e5e5e5",
+    borderRadius: "8px",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#171717",
+    cursor: "pointer",
+  },
+  main: {
+    padding: "32px",
+    maxWidth: "800px",
+    margin: "0 auto",
+  },
+  emptyCard: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e5e5",
+    borderRadius: "12px",
+    padding: "48px",
+    textAlign: "center",
+  },
+  emptyTitle: {
+    fontSize: "28px",
+    fontWeight: "700",
+    color: "#171717",
+    margin: "0 0 12px 0",
+  },
+  emptySubtitle: {
+    fontSize: "16px",
+    color: "#666",
+    margin: "0 0 32px 0",
+  },
+  formCard: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e5e5",
+    borderRadius: "12px",
+    padding: "32px",
+    marginBottom: "32px",
+  },
+  formTitle: {
+    fontSize: "24px",
+    fontWeight: "700",
+    color: "#171717",
+    margin: "0 0 24px 0",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+  },
+  formGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  label: {
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#171717",
+  },
+  input: {
+    padding: "12px 16px",
+    border: "1px solid #e5e5e5",
+    borderRadius: "8px",
+    fontSize: "16px",
+    outline: "none",
+  },
+  select: {
+    padding: "12px 16px",
+    border: "1px solid #e5e5e5",
+    borderRadius: "8px",
+    fontSize: "16px",
+    backgroundColor: "#ffffff",
+    cursor: "pointer",
+    outline: "none",
+  },
+  colorPicker: {
+    display: "flex",
+    gap: "8px",
+  },
+  colorDot: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    cursor: "pointer",
+    outline: "none",
+  },
+  formButtons: {
+    display: "flex",
+    gap: "12px",
+    marginTop: "8px",
+  },
+  primaryButton: {
+    padding: "12px 24px",
+    backgroundColor: "#4f46e5",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#ffffff",
+    cursor: "pointer",
+  },
+  secondaryButton: {
+    padding: "12px 24px",
+    backgroundColor: "#f5f5f5",
+    border: "1px solid #e5e5e5",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "500",
+    color: "#171717",
+    cursor: "pointer",
+  },
+  habitsSection: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "24px",
+  },
+  habitsHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  habitsTitle: {
+    fontSize: "24px",
+    fontWeight: "700",
+    color: "#171717",
+    margin: 0,
+  },
+  habitsList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+  },
+  habitCard: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e5e5",
+    borderRadius: "12px",
+    padding: "20px 24px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  habitLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+  },
+  habitColor: {
+    width: "40px",
+    height: "40px",
+    borderRadius: "50%",
+    flexShrink: 0,
+  },
+  habitInfo: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  habitName: {
+    fontSize: "18px",
+    fontWeight: "600",
+    color: "#171717",
+    margin: 0,
+  },
+  habitMeta: {
+    fontSize: "14px",
+    color: "#666",
+    margin: 0,
+  },
+  habitActions: {
+    display: "flex",
+    gap: "8px",
+  },
+  editButton: {
+    padding: "8px 16px",
+    backgroundColor: "#f5f5f5",
+    border: "1px solid #e5e5e5",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#171717",
+    cursor: "pointer",
+  },
+  deleteButton: {
+    padding: "8px 16px",
+    backgroundColor: "#fef2f2",
+    border: "1px solid #fecaca",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#dc2626",
+    cursor: "pointer",
+  },
+};
