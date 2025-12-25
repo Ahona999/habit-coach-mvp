@@ -6,7 +6,11 @@ export default function Settings({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [userPlan] = useState("Free Plan");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem("sidebarCollapsed") === "true";
+  });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   
   // Settings state
   const [dailyReminders, setDailyReminders] = useState(false);
@@ -68,6 +72,25 @@ export default function Settings({ darkMode, setDarkMode }) {
     window.location.href = "/";
   };
 
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Delete user's habits
+        await supabase.from("habits").delete().eq("user_id", user.id);
+        // Delete user's profile
+        await supabase.from("user_profiles").delete().eq("user_id", user.id);
+        // Sign out and redirect
+        await supabase.auth.signOut();
+        window.location.href = "/";
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      setDeleting(false);
+    }
+  };
+
   // Theme colors - darker black theme
   const theme = darkMode ? {
     bg: "#0a0a0a",
@@ -106,7 +129,11 @@ export default function Settings({ darkMode, setDarkMode }) {
             <h1 style={{ ...styles.logo, color: theme.text }}>Bloom</h1>
           )}
           <button 
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onClick={() => {
+              const newState = !sidebarCollapsed;
+              setSidebarCollapsed(newState);
+              localStorage.setItem("sidebarCollapsed", newState);
+            }}
             style={{ 
               ...styles.collapseBtn, 
               color: theme.textSecondary,
@@ -148,23 +175,21 @@ export default function Settings({ darkMode, setDarkMode }) {
           </button>
         </nav>
 
-        {/* User Profile at bottom */}
+        {/* Logout at bottom */}
         <div style={{ ...styles.sidebarFooter, borderColor: theme.border }}>
-          {!sidebarCollapsed ? (
-            <div style={styles.userProfile}>
-              <div style={styles.avatar}>
-                {userName.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p style={{ ...styles.userName, color: theme.text }}>{userName}</p>
-                <p style={{ ...styles.userPlan, color: theme.textSecondary }}>{userPlan}</p>
-              </div>
-            </div>
-          ) : (
-            <div style={{ ...styles.avatar, margin: "0 auto" }}>
-              {userName.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <button 
+            onClick={handleLogout} 
+            style={{ 
+              ...styles.logoutSidebarBtn, 
+              color: theme.textSecondary,
+              justifyContent: sidebarCollapsed ? "center" : "flex-start",
+              padding: sidebarCollapsed ? "12px" : "12px 16px",
+            }}
+            title="Logout"
+          >
+            <span style={styles.navIcon}>🚪</span>
+            {!sidebarCollapsed && <span>Logout</span>}
+          </button>
         </div>
       </aside>
 
@@ -172,6 +197,7 @@ export default function Settings({ darkMode, setDarkMode }) {
       <main style={{
         ...styles.main,
         marginLeft: sidebarCollapsed ? "64px" : "220px",
+        transition: "margin-left 0.2s ease",
       }}>
         <div style={styles.mainInner}>
           <h1 style={{ ...styles.pageTitle, color: theme.text }}>Settings</h1>
@@ -259,12 +285,63 @@ export default function Settings({ darkMode, setDarkMode }) {
             </div>
           </div>
 
-          {/* Logout Button */}
-          <button onClick={handleLogout} style={{ ...styles.logoutBtn, borderColor: theme.border, color: theme.textSecondary }}>
-            Logout 🚪
-          </button>
+          {/* Delete Account Section */}
+          <div style={{ ...styles.card, backgroundColor: theme.cardBg, borderColor: theme.border }}>
+            <h2 style={{ ...styles.sectionTitle, color: theme.text }}>Danger Zone</h2>
+            
+            <div style={styles.settingRow}>
+              <div style={styles.settingLeft}>
+                <div style={{ ...styles.iconBox, backgroundColor: "#fef2f2" }}>
+                  ⚠️
+                </div>
+                <div>
+                  <p style={{ ...styles.settingLabel, color: theme.text }}>Delete account</p>
+                  <p style={{ ...styles.settingDesc, color: theme.textSecondary }}>
+                    Permanently delete your account and all data
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowDeleteModal(true)} 
+                style={styles.deleteBtn}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div style={styles.modalOverlay} onClick={() => setShowDeleteModal(false)}>
+          <div 
+            style={{ ...styles.modal, backgroundColor: theme.cardBg, borderColor: theme.border }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={styles.modalIcon}>⚠️</div>
+            <h2 style={{ ...styles.modalTitle, color: theme.text }}>Delete Account?</h2>
+            <p style={{ ...styles.modalText, color: theme.textSecondary }}>
+              Are you sure you want to delete your account? This action cannot be undone. All your habits and progress data will be permanently removed.
+            </p>
+            <div style={styles.modalActions}>
+              <button 
+                onClick={() => setShowDeleteModal(false)} 
+                style={{ ...styles.cancelBtn, borderColor: theme.border, color: theme.textSecondary }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDeleteAccount} 
+                disabled={deleting}
+                style={styles.confirmDeleteBtn}
+              >
+                {deleting ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -319,11 +396,15 @@ const styles = {
   },
   // Sidebar
   sidebar: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    height: "100vh",
     borderRight: "1px solid",
     display: "flex",
     flexDirection: "column",
-    transition: "width 0.2s, left 0.3s ease",
-    flexShrink: 0,
+    transition: "width 0.2s ease",
+    zIndex: 100,
   },
   sidebarHeader: {
     padding: "20px 16px",
@@ -422,11 +503,10 @@ const styles = {
   // Main
   main: {
     flex: 1,
-    padding: "48px",
+    padding: "32px 48px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    transition: "margin-left 0.2s ease",
   },
   mainInner: {
     width: "100%",
@@ -481,20 +561,90 @@ const styles = {
     height: "1px",
     margin: "8px 0",
   },
-  logoutBtn: {
+  logoutSidebarBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "12px 16px",
+    width: "100%",
+    border: "none",
+    background: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#666",
+    transition: "background-color 0.15s, color 0.15s",
+  },
+  deleteBtn: {
+    padding: "10px 20px",
+    backgroundColor: "#ef4444",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "14px",
+    fontWeight: "500",
+    cursor: "pointer",
+    transition: "background-color 0.15s",
+  },
+  // Modal
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "8px",
+    zIndex: 200,
+  },
+  modal: {
     width: "100%",
-    padding: "14px",
+    maxWidth: "400px",
+    borderRadius: "16px",
+    padding: "32px",
+    border: "1px solid",
+    textAlign: "center",
+  },
+  modalIcon: {
+    fontSize: "48px",
+    marginBottom: "16px",
+  },
+  modalTitle: {
+    fontSize: "20px",
+    fontWeight: "600",
+    margin: "0 0 12px 0",
+  },
+  modalText: {
+    fontSize: "14px",
+    lineHeight: "1.6",
+    margin: "0 0 24px 0",
+  },
+  modalActions: {
+    display: "flex",
+    gap: "12px",
+    justifyContent: "center",
+  },
+  cancelBtn: {
+    padding: "12px 24px",
     backgroundColor: "transparent",
-    border: "1px solid #e5e5e5",
+    border: "1px solid",
     borderRadius: "8px",
-    fontSize: "15px",
-    color: "#666",
+    fontSize: "14px",
+    fontWeight: "500",
     cursor: "pointer",
-    marginTop: "8px",
+  },
+  confirmDeleteBtn: {
+    padding: "12px 24px",
+    backgroundColor: "#ef4444",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "14px",
+    fontWeight: "500",
+    cursor: "pointer",
   },
 };
 

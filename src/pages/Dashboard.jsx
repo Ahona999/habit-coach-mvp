@@ -12,7 +12,9 @@ export default function Dashboard({ darkMode, setDarkMode }) {
   const [editingHabit, setEditingHabit] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [openMenu, setOpenMenu] = useState(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem("sidebarCollapsed") === "true";
+  });
 
   // Theme colors - darker black theme
   const theme = darkMode ? {
@@ -347,7 +349,11 @@ export default function Dashboard({ darkMode, setDarkMode }) {
             <h1 style={{ ...styles.logo, color: theme.text }}>Bloom</h1>
           )}
           <button 
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onClick={() => {
+              const newState = !sidebarCollapsed;
+              setSidebarCollapsed(newState);
+              localStorage.setItem("sidebarCollapsed", newState);
+            }}
             style={{ 
               ...styles.collapseBtn, 
               color: theme.textSecondary,
@@ -410,6 +416,7 @@ export default function Dashboard({ darkMode, setDarkMode }) {
       <main style={{
         ...styles.main,
         marginLeft: sidebarCollapsed ? "64px" : "220px",
+        transition: "margin-left 0.2s ease",
       }}>
         {/* Header */}
         <header style={styles.header}>
@@ -663,12 +670,16 @@ const styles = {
   },
   // Sidebar
   sidebar: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    height: "100vh",
     backgroundColor: "#fff",
     borderRight: "1px solid #e5e5e5",
     display: "flex",
     flexDirection: "column",
-    transition: "width 0.2s, left 0.3s ease",
-    flexShrink: 0,
+    transition: "width 0.2s ease",
+    zIndex: 100,
   },
   sidebarHeader: {
     padding: "20px 16px",
@@ -761,7 +772,6 @@ const styles = {
     flex: 1,
     padding: "24px 32px",
     overflow: "auto",
-    transition: "margin-left 0.2s ease",
   },
   header: {
     display: "flex",
