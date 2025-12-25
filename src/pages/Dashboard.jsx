@@ -767,7 +767,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "24px",
+    marginBottom: "16px",
     gap: "20px",
     flexWrap: "wrap",
   },
@@ -801,7 +801,7 @@ const styles = {
   contentGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 300px",
-    gap: "28px",
+    gap: "20px",
   },
   leftColumn: {
     display: "flex",
